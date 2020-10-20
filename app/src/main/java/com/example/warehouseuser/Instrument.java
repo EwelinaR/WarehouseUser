@@ -1,8 +1,6 @@
 package com.example.warehouseuser;
 
-
 public class Instrument {
-
     private int id;
     private String manufacturer;
     private String model;
@@ -55,5 +53,16 @@ public class Instrument {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "Instrument{" +
+                "id=" + id +
+                ", manufacturer='" + manufacturer + '\'' +
+                ", model='" + model + '\'' +
+                ", price=" + price +
+                ", quantity=" + quantity +
+                '}';
     }
 }

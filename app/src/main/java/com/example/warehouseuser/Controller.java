@@ -33,9 +33,27 @@ public class Controller implements Callback<List<Instrument>> {
 
         RetrofitApi retrofitApi = retrofit.create(RetrofitApi.class);
 
-        Call<List<Instrument>> call = retrofitApi.getInstruments();
-        call.enqueue(this);
-
+        Instrument instrument = new Instrument(3, "M", "Mod", 123, 3);
+        Call<Void> call = retrofitApi.addInstrument(instrument);
+        //Call<List<Instrument>> call = retrofitApi.getInstruments();
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if(response.isSuccessful()) {
+                    Log.i("API", "Success");
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.e("API", jObjError.getJSONObject("error").getString("message"));
+                    } catch (JSONException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                t.printStackTrace();
+            }});
     }
 
     @Override
@@ -43,6 +61,8 @@ public class Controller implements Callback<List<Instrument>> {
         if(response.isSuccessful()) {
             List<Instrument> instruments = response.body();
             instruments.forEach(instrument -> Log.i("API", "GET: " + instrument.toString()));
+
+            Log.i("API", instruments.get(0).getManufacturer());
         } else {
             try {
                 JSONObject jObjError = new JSONObject(response.errorBody().string());
