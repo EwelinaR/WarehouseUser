@@ -29,7 +29,7 @@ public class InstrumentAdapter extends ArrayAdapter<Instrument> {
 
         manufacturer.setText(instrument.getManufacturer());
         model.setText(instrument.getModel());
-        price.setText(String.valueOf(instrument.getPrice()));
+        price.setText(String.format("%.2f", instrument.getPrice()));
         quantity.setText(String.valueOf(instrument.getQuantity()));
 
         return convertView;

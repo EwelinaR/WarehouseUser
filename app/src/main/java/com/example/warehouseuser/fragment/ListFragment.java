@@ -29,8 +29,8 @@ public class ListFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         ArrayList<Instrument> instruments = new ArrayList<>();
         //TODO use data from server
-        instruments.add(new Instrument(1, "MANUFACTURR", "MODELUU", 1212, 12));
-        instruments.add(new Instrument(2, "XYZ", "MODELUU", 12, 1));
+        instruments.add(new Instrument(1, "Fender", "Player Stratocaster MN PWT", 100000.12F, 12));
+        instruments.add(new Instrument(2, "YAMAHA", "P-45 B", 12, 1));
 
         InstrumentAdapter adapter = new InstrumentAdapter(getActivity(), instruments);
         ListView listView = (ListView) getActivity().findViewById(R.id.list_view);
