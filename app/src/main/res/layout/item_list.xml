@@ -35,8 +35,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="2dp"
                 android:text="szt."
-                android:textSize="16sp" />
+                android:textSize="14sp" />
         </LinearLayout>
 
     </LinearLayout>
@@ -52,7 +53,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Producent:"
+            android:text="Producent"
             android:textSize="12sp" />
 
         <TextView
@@ -74,7 +75,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Model:"
+            android:text="Model"
             android:textSize="12sp" />
 
         <TextView
@@ -95,7 +96,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Cena:"
+            android:text="Cena"
             android:textSize="12sp" />
 
         <LinearLayout
@@ -112,6 +113,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="2dp"
                 android:text="PLN"
                 android:textSize="14sp" />
         </LinearLayout>

@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.R;
 import com.example.warehouseuser.api.RestApi;
+import com.google.android.material.snackbar.Snackbar;
 
 public class AddViewFragment extends DetailedFragment implements FragmentUpdate {
 
@@ -38,7 +39,7 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate 
         });
 
         Button save = (Button) getActivity().findViewById(R.id.save);
-        save.setOnClickListener(view -> save());
+        save.setOnClickListener(this::save);
         save.setText("Dodaj");
 
         Button delete = (Button) getActivity().findViewById(R.id.delete);
@@ -54,12 +55,14 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate 
         quantityDifference.setVisibility(View.INVISIBLE);
     }
 
-    private void save() {
-        //TODO validate data
-        //TODO update in server
-        Log.i("Screen", "Go to list view from edit view");
+    private void save(View view) {
+        if (isValidData()) {
+            Snackbar.make(view, ERROR_MESSAGE, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
+        Log.i("Screen", "Go to list view from add view");
         RestApi c = new RestApi();
-
         Instrument instrument = new Instrument(
                 0,
                 manufacturer.getText().toString(),
@@ -68,10 +71,6 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate 
                 0);
 
         c.addInstrument(instrument, this);
-        // FragmentManager fm = getFragmentManager();
-        //FragmentTransaction ft = fm.beginTransaction();
-        // ft.replace(R.id.fragment_placeholder, new ListFragment());
-        // ft.commit();
     }
 
     @Override

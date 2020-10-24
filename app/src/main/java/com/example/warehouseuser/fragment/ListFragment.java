@@ -16,6 +16,7 @@ import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.InstrumentAdapter;
 import com.example.warehouseuser.R;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
@@ -30,6 +31,15 @@ public class ListFragment extends Fragment implements FragmentUpdateList {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         RestApi controller = new RestApi();
         controller.getInstruments(this);
+
+        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.add);
+        fab.setOnClickListener(view1 -> {
+            Log.i("Screen", "Go to add view");
+            FragmentManager fm = getFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.fragment_placeholder, new AddViewFragment()).addToBackStack(null);
+            ft.commit();
+        });
     }
 
     @Override

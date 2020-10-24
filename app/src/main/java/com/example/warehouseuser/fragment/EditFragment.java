@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentManager;
 import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.R;
+import com.google.android.material.snackbar.Snackbar;
 
 public class EditFragment extends DetailedFragment implements FragmentUpdate {
 
@@ -38,7 +39,7 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate {
         });
 
         Button save = (Button) getActivity().findViewById(R.id.save);
-        save.setOnClickListener(view -> save());
+        save.setOnClickListener(this::save);
         save.setText("Zapisz");
 
         Button delete = (Button) getActivity().findViewById(R.id.delete);
@@ -73,7 +74,12 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate {
         quantity.setText(String.valueOf(instrument.getQuantity()));
     }
 
-    private void save() {
+    private void save(View view) {
+        if (!isValidData()) {
+            Snackbar.make(view, ERROR_MESSAGE, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
         Log.i("Screen", "Go to list view from edit view");
         RestApi c = new RestApi();
 

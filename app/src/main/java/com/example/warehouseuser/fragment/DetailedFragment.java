@@ -20,6 +20,8 @@ public class DetailedFragment extends Fragment {
     protected TextView quantity;
     protected TextView quantityDifference;
 
+    final protected String ERROR_MESSAGE = "Pola są puste lub cena jest równa zero.";
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.edit_view, parent, false);
@@ -42,15 +44,26 @@ public class DetailedFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence ch, int start, int before, int count) {
                 String s = ch.toString();
-                if(s.length() == 0) {
-                    price.setText("0");
-                    price.setSelection(price.getText().length());
-                }
-                if(!s.matches("^(\\d{1,6})((\\.)|(\\.\\d{0,2}))?$")) {
+                 if(s.length() > 0 && !s.matches("^(\\d{1,6})((\\.)|(\\.\\d{0,2}))?$")) {
                     price.setText(s.substring(0, s.length()-1));
                     price.setSelection(price.getText().length());
                 }
             }
         });
+    }
+
+    protected boolean isValidData() {
+        String priceString = price.getText().toString();
+        if (manufacturer.getText().length() == 0 || model.getText().length() == 0 || priceString.length() == 0) {
+            return false;
+        }
+        if (priceString.endsWith(".")) {
+            priceString = priceString.substring(0, priceString.length() - 1);
+            price.setText(priceString);
+        }
+        if (Float.parseFloat(priceString) == 0) {
+            return false;
+        }
+        return true;
     }
 }
