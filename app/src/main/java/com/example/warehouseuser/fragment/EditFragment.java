@@ -15,10 +15,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.R;
 
-public class EditFragment extends Fragment {
+public class EditFragment extends Fragment implements FragmentUpdate {
 
     private Instrument instrument;
     private EditText manufacturer;
@@ -159,6 +160,12 @@ public class EditFragment extends Fragment {
 
     private void delete() {
         //TODO update in server
+        RestApi c = new RestApi();
+        c.deleteInstrument(instrument.getId(), this);
+    }
+
+    @Override
+    public void updateView(Instrument instruments) {
         Log.i("Screen", "Go to list view from edit view");
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();

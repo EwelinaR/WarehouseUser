@@ -7,10 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class InstrumentAdapter extends ArrayAdapter<Instrument> {
-    public InstrumentAdapter(Context context, ArrayList<Instrument> instruments) {
+    public InstrumentAdapter(Context context, List<Instrument> instruments) {
         super(context, 0, instruments);
     }
 

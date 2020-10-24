@@ -1,4 +1,6 @@
-package com.example.warehouseuser;
+package com.example.warehouseuser.api;
+
+import com.example.warehouseuser.Instrument;
 
 import java.util.List;
 
@@ -21,10 +23,11 @@ public interface RetrofitApi {
     Call<Void> updateInstrument(@Path("id") int id, @Body Instrument instrument);
 
     @PUT("instruments/increase/{id}/{amount}")
-    Call<Integer> increaseQuantity(@Path("id") int id, @Path("amount") int amount);
+    Call<Void> increaseQuantity(@Path("id") int id, @Path("amount") int amount);
 
-    @DELETE("instrumetns/{id}")
+    @PUT("instruments/decrease/{id}/{amount}")
+    Call<Void> decreaseQuantity(@Path("id") int id, @Path("amount") int amount);
+
+    @DELETE("instruments/{id}")
     Call<Void>  deleteInstrument(@Path("id") int status);
-
-
 }
