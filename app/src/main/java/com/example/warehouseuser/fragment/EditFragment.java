@@ -1,131 +1,56 @@
 package com.example.warehouseuser.fragment;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.R;
 
-public class EditFragment extends Fragment implements FragmentUpdate {
+public class EditFragment extends DetailedFragment implements FragmentUpdate {
 
     private Instrument instrument;
-    private EditText manufacturer;
-    private EditText model;
-    private EditText price;
-    private TextView quantity;
-    private TextView quantityDifference;
-
-    public EditFragment() { }
+    private int numberOfRequests = 0;
 
     public EditFragment(Instrument instrument) {
         this.instrument = instrument;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.edit_view, parent, false);
-    }
-
-    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        boolean isEditView = instrument != null;
         initEditTexts();
         initPriceField();
-        initQuantityFields(isEditView);
-        initButtons(isEditView);
-        if(isEditView)
-            setInstrument();
+        initQuantityFields();
+        initButtons();
+        setInstrument();
     }
 
-    private void initEditTexts() {
-        manufacturer = (EditText) getActivity().findViewById(R.id.manufacturer_edit);
-        model = (EditText) getActivity().findViewById(R.id.model_edit);
-        price = (EditText) getActivity().findViewById(R.id.price_edit);
-        quantity = (TextView) getActivity().findViewById(R.id.quantity_amount);
-        quantityDifference = (TextView) getActivity().findViewById(R.id.quantity_edit);
-    }
-
-    private void initPriceField() {
-        price.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {}
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-            @Override
-            public void onTextChanged(CharSequence ch, int start, int before, int count) {
-                String s = ch.toString();
-                if(s.length() == 0) {
-                    price.setText("0");
-                    price.setSelection(price.getText().length());
-                }
-                if(!s.matches("^(\\d{1,6})((\\.)|(\\.\\d{0,2}))?$")) {
-                    price.setText(s.substring(0, s.length()-1));
-                    price.setSelection(price.getText().length());
-                }
-            }
-        });
-    }
-
-    private void initButtons(boolean isEditView) {
+    private void initButtons() {
         Button cancel = (Button) getActivity().findViewById(R.id.cancel);
-        cancel.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                FragmentManager fm = getFragmentManager();
-                Log.i("Screen", "Back to list view from edit view");
-                fm.popBackStack();
-            }});
+        cancel.setOnClickListener(view -> {
+            FragmentManager fm = getFragmentManager();
+            Log.i("Screen", "Back to list view from edit view");
+            fm.popBackStack();
+        });
 
         Button save = (Button) getActivity().findViewById(R.id.save);
-        save.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                save();
-            }});
+        save.setOnClickListener(view -> save());
+        save.setText("Zapisz");
 
         Button delete = (Button) getActivity().findViewById(R.id.delete);
-
-        if(isEditView) {
-            save.setText("Dodaj");
-            delete.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    delete();
-                }});
-        } else {
-            save.setText("Zapisz");
-            delete.setVisibility(View.INVISIBLE);
-        }
+        delete.setOnClickListener(view -> delete());
     }
 
-    private void initQuantityFields(boolean isEditView) {
+    private void initQuantityFields() {
         Button increase = (Button) getActivity().findViewById(R.id.increase);
         Button decrease = (Button) getActivity().findViewById(R.id.decrease);
 
-        if(isEditView) {
-            increase.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    setNewQuantity(1);
-                }});
-            decrease.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    setNewQuantity(-1);
-                }});
-        } else {
-            increase.setVisibility(View.INVISIBLE);
-            decrease.setVisibility(View.INVISIBLE);
-            quantityDifference.setVisibility(View.INVISIBLE);
-        }
+        increase.setOnClickListener(view -> setNewQuantity(1));
+        decrease.setOnClickListener(view -> setNewQuantity(-1));
     }
 
     private void setNewQuantity(int quantityChange) {
@@ -149,27 +74,65 @@ public class EditFragment extends Fragment implements FragmentUpdate {
     }
 
     private void save() {
-        //TODO validate data
-        //TODO update in server
         Log.i("Screen", "Go to list view from edit view");
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.fragment_placeholder, new ListFragment());
-        ft.commit();
+        RestApi c = new RestApi();
+
+        int amount = Integer.parseInt(quantityDifference.getText().toString());
+        if (amount > 0) {
+            c.increaseQuantity(instrument.getId(), amount, this);
+            numberOfRequests++;
+        }
+        else if (amount < 0) {
+            c.decreaseQuantity(instrument.getId(), -amount, this);
+            numberOfRequests++;
+        }
+
+        if (isDataChanged()) {
+            c.editInstrument(instrument, this);
+            numberOfRequests++;
+        }
+
+        if (numberOfRequests == 0) {
+            FragmentManager fm = getFragmentManager();
+            fm.popBackStack();
+        }
+    }
+
+    private boolean isDataChanged() {
+        boolean isChanged = false;
+        if (!instrument.getManufacturer().equals(manufacturer.getText().toString())) {
+            instrument.setManufacturer(manufacturer.getText().toString());
+            isChanged = true;
+        }
+        if (!instrument.getModel().equals(model.getText().toString())) {
+            instrument.setModel(model.getText().toString());
+            isChanged = true;
+        }
+        if (instrument.getPrice() != Float.parseFloat(price.getText().toString())) {
+            if (price.getText().toString().endsWith(".")) {
+                String correctedPrice = price.getText().subSequence(0, price.getText().length()-1).toString();
+                instrument.setPrice(Float.parseFloat(correctedPrice));
+            } else {
+                instrument.setPrice(Float.parseFloat(price.getText().toString()));
+            }
+            isChanged = true;
+        }
+        return isChanged;
     }
 
     private void delete() {
-        //TODO update in server
         RestApi c = new RestApi();
         c.deleteInstrument(instrument.getId(), this);
     }
 
     @Override
     public void updateView(Instrument instruments) {
+        if (numberOfRequests > 1) {
+            numberOfRequests--;
+            return;
+        }
         Log.i("Screen", "Go to list view from edit view");
         FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.fragment_placeholder, new ListFragment());
-        ft.commit();
+        fm.popBackStack();
     }
 }

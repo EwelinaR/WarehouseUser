@@ -19,8 +19,8 @@ public interface RetrofitApi {
     @POST("instruments")
     Call<Void> addInstrument(@Body Instrument instrument);
 
-    @PUT("instruments/{id}")
-    Call<Void> updateInstrument(@Path("id") int id, @Body Instrument instrument);
+    @PUT("instruments")
+    Call<Void> updateInstrument(@Body Instrument instrument);
 
     @PUT("instruments/increase/{id}/{amount}")
     Call<Void> increaseQuantity(@Path("id") int id, @Path("amount") int amount);
