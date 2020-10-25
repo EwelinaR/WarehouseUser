@@ -17,11 +17,13 @@ import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.InstrumentAdapter;
 import com.example.warehouseuser.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
 public class ListFragment extends Fragment implements FragmentUpdateList {
 
+    private RestApi controller;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.list_view, parent, false);
@@ -29,7 +31,7 @@ public class ListFragment extends Fragment implements FragmentUpdateList {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        RestApi controller = new RestApi();
+        controller = new RestApi();
         controller.getInstruments(this);
 
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.add);
@@ -43,7 +45,14 @@ public class ListFragment extends Fragment implements FragmentUpdateList {
     }
 
     @Override
-    public void updateView(List<Instrument> instruments) {
+    public void updateView(List<Instrument> instruments, int responseStatus) {
+        if(responseStatus == -1) {
+            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.list_view),
+                    "Brak połączenia z serwerem. ", Snackbar.LENGTH_INDEFINITE);
+            mySnackbar.setAction("połącz ponownie", view12 -> controller.getInstruments(this));
+            mySnackbar.show();
+            return;
+        }
         InstrumentAdapter adapter = new InstrumentAdapter(getActivity(), instruments);
         ListView listView = (ListView) getActivity().findViewById(R.id.list_view);
         listView.setAdapter(adapter);

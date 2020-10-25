@@ -46,7 +46,7 @@ public class StartFragment extends Fragment {
             Log.i("Screen", "Go to login view");
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.fragment_placeholder, new AddViewFragment());
+            ft.replace(R.id.fragment_placeholder, new SignInFragment());
             ft.commit();
         });
     }

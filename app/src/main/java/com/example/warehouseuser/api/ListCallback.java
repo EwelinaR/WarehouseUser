@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -28,7 +29,7 @@ public class ListCallback implements Callback<List<Instrument>> {
         if(response.isSuccessful()) {
             List<Instrument> instruments = response.body();
             instruments.forEach(instrument -> Log.i("API", "GET: " + instrument.toString()));
-            fragmentView.updateView(instruments);
+            fragmentView.updateView(instruments, 0);
         } else {
             try {
                 JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -41,6 +42,11 @@ public class ListCallback implements Callback<List<Instrument>> {
 
     @Override
     public void onFailure(Call<List<Instrument>> call, Throwable t) {
-        t.printStackTrace();
+        if (t instanceof SocketTimeoutException) {
+            Log.e("Connection", "SocketTimeoutException");
+            fragmentView.updateView(null, -1);
+        } else {
+            t.printStackTrace();
+        }
     }
 }
