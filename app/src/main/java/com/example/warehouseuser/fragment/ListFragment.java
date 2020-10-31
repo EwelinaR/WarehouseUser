@@ -21,7 +21,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
-public class ListFragment extends Fragment implements FragmentUpdateList {
+public class ListFragment extends Fragment implements FragmentUpdateList, FragmentUpdate {
 
     private RestApi controller;
     @Override
@@ -31,8 +31,9 @@ public class ListFragment extends Fragment implements FragmentUpdateList {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        controller = new RestApi();
-        controller.getInstruments(this);
+        controller = new RestApi(this.getContext());
+        controller.getToken(this, "Ala", "123");
+
 
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.add);
         fab.setOnClickListener(view1 -> {
@@ -66,5 +67,10 @@ public class ListFragment extends Fragment implements FragmentUpdateList {
                 ft.commit();
             }
         });
+    }
+
+    @Override
+    public void updateView(Instrument instruments) {
+        controller.getInstruments(this);
     }
 }

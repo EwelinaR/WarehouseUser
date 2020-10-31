@@ -81,7 +81,7 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate {
             return;
         }
         Log.i("Screen", "Go to list view from edit view");
-        RestApi c = new RestApi();
+        RestApi c = new RestApi(this.getContext());
 
         int amount = Integer.parseInt(quantityDifference.getText().toString());
         if (amount > 0) {
@@ -127,7 +127,7 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate {
     }
 
     private void delete() {
-        RestApi c = new RestApi();
+        RestApi c = new RestApi(this.getContext());
         c.deleteInstrument(instrument.getId(), this);
     }
 

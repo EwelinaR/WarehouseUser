@@ -56,13 +56,13 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate 
     }
 
     private void save(View view) {
-        if (isValidData()) {
+        if (!isValidData()) {
             Snackbar.make(view, ERROR_MESSAGE, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
             return;
         }
         Log.i("Screen", "Go to list view from add view");
-        RestApi c = new RestApi();
+        RestApi c = new RestApi(this.getContext());
         Instrument instrument = new Instrument(
                 0,
                 manufacturer.getText().toString(),

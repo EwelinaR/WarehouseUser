@@ -26,6 +26,7 @@ public class ListCallback implements Callback<List<Instrument>> {
 
     @Override
     public void onResponse(Call<List<Instrument>> call, Response<List<Instrument>> response) {
+        Log.i("CODE", String.valueOf(response.code()));
         if(response.isSuccessful()) {
             List<Instrument> instruments = response.body();
             instruments.forEach(instrument -> Log.i("API", "GET: " + instrument.toString()));

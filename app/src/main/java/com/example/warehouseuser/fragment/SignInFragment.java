@@ -21,6 +21,8 @@ public class SignInFragment extends Fragment {
     private Button signIn;
     private boolean emptyUsername;
     private boolean emptyPassword;
+    private EditText username;
+    private EditText password;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -46,6 +48,9 @@ public class SignInFragment extends Fragment {
         signIn = (Button) getActivity().findViewById(R.id.sign_in);
         signIn.setOnClickListener(view -> {
             ///TODO check login & pass
+            //RestApi api = new RestApi(this.getContext());
+            //api.getToken(this.getContext(), this, username.getText().toString(), password.getText().toString());
+
             Log.i("Screen", "Go to list view");
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
@@ -57,7 +62,7 @@ public class SignInFragment extends Fragment {
 
     private void initEditTextFields() {
         emptyUsername = true;
-        EditText username = (EditText) getActivity().findViewById(R.id.username);
+        username = (EditText) getActivity().findViewById(R.id.username);
         username.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {}
@@ -78,7 +83,7 @@ public class SignInFragment extends Fragment {
         });
 
         emptyPassword = true;
-        EditText password = (EditText) getActivity().findViewById(R.id.password);
+        password = (EditText) getActivity().findViewById(R.id.password);
         password.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {}
