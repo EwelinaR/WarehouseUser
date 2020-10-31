@@ -8,6 +8,7 @@ import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.SessionManager;
 import com.example.warehouseuser.fragment.FragmentUpdate;
 import com.example.warehouseuser.fragment.FragmentUpdateList;
+import com.example.warehouseuser.fragment.OnAuthenticationUpdate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -55,13 +56,13 @@ public class RestApi {
         return retrofit.create(RetrofitApi.class);
     }
 
-    public void getToken(FragmentUpdate fragmentView, String username, String password) {
+    public void getToken(OnAuthenticationUpdate update, String username, String password) {
         String authToken = Credentials.basic("client", "secret");
 
         RetrofitApi retrofitApi = createRetrofitApi(authToken);
 
         Call<TokenResponse> call = retrofitApi.getAccessToken(username, password, "password");
-        call.enqueue(new SignInCallback(context, fragmentView));
+        call.enqueue(new SignInCallback(context, update));
     }
 
     public void getInstruments(FragmentUpdateList fragmentView) {

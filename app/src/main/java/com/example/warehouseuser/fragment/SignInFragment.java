@@ -15,9 +15,13 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.warehouseuser.R;
+import com.example.warehouseuser.RequestResponseStatus;
+import com.example.warehouseuser.api.RestApi;
+import com.google.android.material.snackbar.Snackbar;
 
-public class SignInFragment extends Fragment {
+public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
 
+    private RestApi api;
     private Button signIn;
     private boolean emptyUsername;
     private boolean emptyPassword;
@@ -33,6 +37,7 @@ public class SignInFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         initButtons();
         initEditTextFields();
+        api = new RestApi(this.getContext());
     }
 
     private void initButtons() {
@@ -47,15 +52,7 @@ public class SignInFragment extends Fragment {
 
         signIn = (Button) getActivity().findViewById(R.id.sign_in);
         signIn.setOnClickListener(view -> {
-            ///TODO check login & pass
-            //RestApi api = new RestApi(this.getContext());
-            //api.getToken(this.getContext(), this, username.getText().toString(), password.getText().toString());
-
-            Log.i("Screen", "Go to list view");
-            FragmentManager fm = getFragmentManager();
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.fragment_placeholder, new ListFragment());
-            ft.commit();
+            api.getToken( this, username.getText().toString(), password.getText().toString());
         });
         signIn.setEnabled(false);
     }
@@ -102,5 +99,28 @@ public class SignInFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onAuthentication(RequestResponseStatus status) {
+        if (status == RequestResponseStatus.OK) {
+            Log.i("Screen", "Go to list view");
+            FragmentManager fm = getFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.fragment_placeholder, new ListFragment());
+            ft.commit();
+        }
+        else if (status == RequestResponseStatus.UNAUTHORIZED) {
+            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.sign_in),
+                    getString(R.string.signIn_failed), Snackbar.LENGTH_LONG);
+            mySnackbar.show();
+        }
+        else if (status == RequestResponseStatus.TIMEOUT) {
+            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.sign_in),
+                    getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
+            mySnackbar.setAction(getString(R.string.retry_connection),
+                    view12 -> api.getToken(this, username.getText().toString(), password.getText().toString()));
+            mySnackbar.show();
+        }
     }
 }

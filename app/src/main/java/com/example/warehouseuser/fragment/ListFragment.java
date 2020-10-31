@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.InstrumentAdapter;
@@ -21,9 +22,10 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
-public class ListFragment extends Fragment implements FragmentUpdateList, FragmentUpdate {
+public class ListFragment extends Fragment implements FragmentUpdateList, OnAuthenticationUpdate {
 
     private RestApi controller;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.list_view, parent, false);
@@ -33,7 +35,6 @@ public class ListFragment extends Fragment implements FragmentUpdateList, Fragme
     public void onViewCreated(View view, Bundle savedInstanceState) {
         controller = new RestApi(this.getContext());
         controller.getToken(this, "Ala", "123");
-
 
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.add);
         fab.setOnClickListener(view1 -> {
@@ -49,8 +50,8 @@ public class ListFragment extends Fragment implements FragmentUpdateList, Fragme
     public void updateView(List<Instrument> instruments, int responseStatus) {
         if(responseStatus == -1) {
             Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.list_view),
-                    "Brak połączenia z serwerem. ", Snackbar.LENGTH_INDEFINITE);
-            mySnackbar.setAction("połącz ponownie", view12 -> controller.getInstruments(this));
+                    getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
+            mySnackbar.setAction(getString(R.string.retry_connection), view12 -> controller.getInstruments(this));
             mySnackbar.show();
             return;
         }
@@ -70,7 +71,7 @@ public class ListFragment extends Fragment implements FragmentUpdateList, Fragme
     }
 
     @Override
-    public void updateView(Instrument instruments) {
+    public void onAuthentication(RequestResponseStatus status) {
         controller.getInstruments(this);
     }
 }
