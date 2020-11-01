@@ -2,12 +2,14 @@ package com.example.warehouseuser.api;
 
 import android.util.Log;
 
+import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.fragment.FragmentUpdate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -23,9 +25,15 @@ public class VoidCallback implements Callback<Void> {
 
     @Override
     public void onResponse(Call<Void> call, Response<Void> response) {
+        Log.i("API", "CODE: "+response.code());
+
         if(response.isSuccessful()) {
             Log.i("API", "Request successful");
-            fragment.updateView(null);
+            fragment.updateView(RequestResponseStatus.OK);
+        } else if (response.code() == 401) {
+            fragment.updateView(RequestResponseStatus.UNAUTHORIZED);
+        } else if (response.code() == 403) {
+            fragment.updateView(RequestResponseStatus.FORBIDDEN);
         } else {
             try {
                 JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -38,6 +46,11 @@ public class VoidCallback implements Callback<Void> {
 
     @Override
     public void onFailure(Call<Void> call, Throwable t) {
-        t.printStackTrace();
+        if (t instanceof SocketTimeoutException) {
+            Log.e("Connection", "SocketTimeoutException");
+            fragment.updateView(RequestResponseStatus.TIMEOUT);
+        } else {
+            t.printStackTrace();
+        }
     }
 }

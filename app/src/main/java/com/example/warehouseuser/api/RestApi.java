@@ -24,11 +24,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RestApi {
 
     static final String BASE_URL = "http://192.168.1.132:8080/";
-
-    private Context context;
+    private SessionManager manager;
 
     public RestApi(Context context) {
-        this.context = context;
+        this.manager = new SessionManager(context);
     }
 
 
@@ -42,8 +41,8 @@ public class RestApi {
                 .create();
 
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(2, TimeUnit.SECONDS)
-                .readTimeout(2, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
                 .addInterceptor(interceptor)
                 .build();
 
@@ -62,11 +61,18 @@ public class RestApi {
         RetrofitApi retrofitApi = createRetrofitApi(authToken);
 
         Call<TokenResponse> call = retrofitApi.getAccessToken(username, password, "password");
-        call.enqueue(new SignInCallback(context, update));
+        call.enqueue(new SignInCallback(manager, update));
+    }
+
+    public void refreshToken(OnAuthenticationUpdate update) {
+        String authToken = Credentials.basic("client", "secret");
+        RetrofitApi retrofitApi = createRetrofitApi(authToken);
+
+        Call<TokenResponse> call = retrofitApi.refreshToken("refresh_token", manager.getRefreshToken());
+        call.enqueue(new SignInCallback(manager, update));
     }
 
     public void getInstruments(FragmentUpdateList fragmentView) {
-        SessionManager manager = new SessionManager(context);
         RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
 
         Call<List<Instrument>> call = retrofitApi.getInstruments();
@@ -74,7 +80,6 @@ public class RestApi {
     }
 
     public void editInstrument(Instrument instrument, FragmentUpdate fragmentView) {
-        SessionManager manager = new SessionManager(context);
         RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
 
         Call<Void> call = retrofitApi.updateInstrument(instrument);
@@ -82,7 +87,6 @@ public class RestApi {
     }
 
     public void addInstrument(Instrument instrument, FragmentUpdate fragmentView) {
-        SessionManager manager = new SessionManager(context);
         RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
 
         Call<Void> call = retrofitApi.addInstrument(instrument);
@@ -90,7 +94,6 @@ public class RestApi {
     }
 
     public void increaseQuantity(int id, int amount, FragmentUpdate fragmentView) {
-        SessionManager manager = new SessionManager(context);
         RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
 
         Call<Void> call = retrofitApi.increaseQuantity(id, amount);
@@ -98,7 +101,6 @@ public class RestApi {
     }
 
     public void decreaseQuantity(int id, int amount, FragmentUpdate fragmentView) {
-        SessionManager manager = new SessionManager(context);
         RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
 
         Call<Void> call = retrofitApi.decreaseQuantity(id, amount);
@@ -106,7 +108,6 @@ public class RestApi {
     }
 
     public void deleteInstrument(int index, FragmentUpdate fragmentView) {
-        SessionManager manager = new SessionManager(context);
         RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
 
         Call<Void> call = retrofitApi.deleteInstrument(index);

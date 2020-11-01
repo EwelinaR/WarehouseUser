@@ -110,7 +110,7 @@ public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
             ft.replace(R.id.fragment_placeholder, new ListFragment());
             ft.commit();
         }
-        else if (status == RequestResponseStatus.UNAUTHORIZED) {
+        else if (status == RequestResponseStatus.BAD_CREDENTIALS) {
             Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.sign_in),
                     getString(R.string.signIn_failed), Snackbar.LENGTH_LONG);
             mySnackbar.show();

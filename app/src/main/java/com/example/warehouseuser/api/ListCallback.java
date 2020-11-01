@@ -3,6 +3,7 @@ package com.example.warehouseuser.api;
 import android.util.Log;
 
 import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.fragment.FragmentUpdateList;
 
 import org.json.JSONException;
@@ -26,11 +27,16 @@ public class ListCallback implements Callback<List<Instrument>> {
 
     @Override
     public void onResponse(Call<List<Instrument>> call, Response<List<Instrument>> response) {
-        Log.i("CODE", String.valueOf(response.code()));
+        Log.i("API", "CODE: "+response.code());
+
         if(response.isSuccessful()) {
             List<Instrument> instruments = response.body();
             instruments.forEach(instrument -> Log.i("API", "GET: " + instrument.toString()));
-            fragmentView.updateView(instruments, 0);
+            fragmentView.updateView(RequestResponseStatus.OK, instruments);
+        } else if (response.code() == 401) {
+            fragmentView.updateView(RequestResponseStatus.UNAUTHORIZED, null);
+        } else if (response.code() == 403) {
+            fragmentView.updateView(RequestResponseStatus.FORBIDDEN, null);
         } else {
             try {
                 JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -45,7 +51,7 @@ public class ListCallback implements Callback<List<Instrument>> {
     public void onFailure(Call<List<Instrument>> call, Throwable t) {
         if (t instanceof SocketTimeoutException) {
             Log.e("Connection", "SocketTimeoutException");
-            fragmentView.updateView(null, -1);
+            fragmentView.updateView(RequestResponseStatus.TIMEOUT, null);
         } else {
             t.printStackTrace();
         }

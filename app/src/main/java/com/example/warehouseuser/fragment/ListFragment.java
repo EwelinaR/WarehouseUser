@@ -24,7 +24,7 @@ import java.util.List;
 
 public class ListFragment extends Fragment implements FragmentUpdateList, OnAuthenticationUpdate {
 
-    private RestApi controller;
+    private RestApi api;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -33,8 +33,9 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        controller = new RestApi(this.getContext());
-        controller.getToken(this, "Ala", "123");
+        api = new RestApi(this.getContext());
+      //  controller.getToken(this, "Ala", "123");
+        api.getInstruments(this);
 
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.add);
         fab.setOnClickListener(view1 -> {
@@ -47,12 +48,16 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
     }
 
     @Override
-    public void updateView(List<Instrument> instruments, int responseStatus) {
-        if(responseStatus == -1) {
+    public void updateView(RequestResponseStatus status, List<Instrument> instruments) {
+        if (status == RequestResponseStatus.TIMEOUT) {
             Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.list_view),
                     getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
-            mySnackbar.setAction(getString(R.string.retry_connection), view12 -> controller.getInstruments(this));
+            mySnackbar.setAction(getString(R.string.retry_connection), view12 -> api.getInstruments(this));
             mySnackbar.show();
+            return;
+        }
+        else if (status == RequestResponseStatus.UNAUTHORIZED) {
+            api.refreshToken(this);
             return;
         }
         InstrumentAdapter adapter = new InstrumentAdapter(getActivity(), instruments);
@@ -72,6 +77,6 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
 
     @Override
     public void onAuthentication(RequestResponseStatus status) {
-        controller.getInstruments(this);
+        api.getInstruments(this);
     }
 }

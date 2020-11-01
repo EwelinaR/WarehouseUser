@@ -1,6 +1,5 @@
 package com.example.warehouseuser.api;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.example.warehouseuser.RequestResponseStatus;
@@ -20,24 +19,24 @@ import retrofit2.Response;
 public class SignInCallback implements Callback<TokenResponse> {
 
     private OnAuthenticationUpdate update;
-    private Context context;
+    private SessionManager manager;
 
-    public SignInCallback(Context context, OnAuthenticationUpdate update) {
+    public SignInCallback(SessionManager manager, OnAuthenticationUpdate update) {
         this.update = update;
-        this.context = context;
+        this.manager = manager;
     }
 
     @Override
     public void onResponse(Call<TokenResponse> call, Response<TokenResponse> response) {
-        Log.w("API", "CODE: "+response.code());
+        Log.i("API", "CODE: "+response.code());
+
         if(response.isSuccessful()) {
-            SessionManager sessionManager = new SessionManager(context);
             TokenResponse token = response.body();
-            sessionManager.setAccessToken(token.getAccessToken());
-            sessionManager.setRefreshToken(token.getRefreshToken());
+            manager.setAccessToken(token.getAccessToken());
+            manager.setRefreshToken(token.getRefreshToken());
             update.onAuthentication(RequestResponseStatus.OK);
         } else if (response.code() == 400) {
-            update.onAuthentication(RequestResponseStatus.UNAUTHORIZED);
+            update.onAuthentication(RequestResponseStatus.BAD_CREDENTIALS);
         } else {
             try {
                 JSONObject jObjError = new JSONObject(response.errorBody().string());

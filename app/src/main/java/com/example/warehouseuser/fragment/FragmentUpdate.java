@@ -1,7 +1,7 @@
 package com.example.warehouseuser.fragment;
 
-import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.RequestResponseStatus;
 
 public interface FragmentUpdate {
-    void updateView(Instrument instruments);
+    void updateView(RequestResponseStatus status);
 }

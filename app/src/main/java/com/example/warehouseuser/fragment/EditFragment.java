@@ -7,15 +7,19 @@ import android.widget.Button;
 
 import androidx.fragment.app.FragmentManager;
 
+import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.R;
 import com.google.android.material.snackbar.Snackbar;
 
-public class EditFragment extends DetailedFragment implements FragmentUpdate {
+public class EditFragment extends DetailedFragment implements FragmentUpdate, OnAuthenticationUpdate {
 
+    private RestApi api;
     private Instrument instrument;
     private int numberOfRequests = 0;
+    private boolean isDataChanged;
+    private boolean isDeleteAction;
 
     public EditFragment(Instrument instrument) {
         this.instrument = instrument;
@@ -28,6 +32,7 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate {
         initQuantityFields();
         initButtons();
         setInstrument();
+        api = new RestApi(this.getContext());
     }
 
     private void initButtons() {
@@ -80,22 +85,26 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate {
                     .setAction("Action", null).show();
             return;
         }
-        Log.i("Screen", "Go to list view from edit view");
-        RestApi c = new RestApi(this.getContext());
+        isDeleteAction = false;
+        checkDataChanges();
+        sendRequests();
+    }
 
+    private void sendRequests() {
         int amount = Integer.parseInt(quantityDifference.getText().toString());
         if (amount > 0) {
-            c.increaseQuantity(instrument.getId(), amount, this);
+            api.increaseQuantity(instrument.getId(), amount, this);
             numberOfRequests++;
         }
         else if (amount < 0) {
-            c.decreaseQuantity(instrument.getId(), -amount, this);
+            api.decreaseQuantity(instrument.getId(), -amount, this);
             numberOfRequests++;
         }
 
-        if (isDataChanged()) {
-            c.editInstrument(instrument, this);
+        if (isDataChanged) {
+            api.editInstrument(instrument, this);
             numberOfRequests++;
+            System.out.println("DATA CHANGED");
         }
 
         if (numberOfRequests == 0) {
@@ -104,15 +113,15 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate {
         }
     }
 
-    private boolean isDataChanged() {
-        boolean isChanged = false;
+    private void checkDataChanges() {
+        isDataChanged = false;
         if (!instrument.getManufacturer().equals(manufacturer.getText().toString())) {
             instrument.setManufacturer(manufacturer.getText().toString());
-            isChanged = true;
+            isDataChanged = true;
         }
         if (!instrument.getModel().equals(model.getText().toString())) {
             instrument.setModel(model.getText().toString());
-            isChanged = true;
+            isDataChanged = true;
         }
         if (instrument.getPrice() != Float.parseFloat(price.getText().toString())) {
             if (price.getText().toString().endsWith(".")) {
@@ -121,24 +130,53 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate {
             } else {
                 instrument.setPrice(Float.parseFloat(price.getText().toString()));
             }
-            isChanged = true;
+            isDataChanged = true;
         }
-        return isChanged;
     }
 
     private void delete() {
-        RestApi c = new RestApi(this.getContext());
-        c.deleteInstrument(instrument.getId(), this);
+        isDeleteAction = true;
+        numberOfRequests++;
+        api.deleteInstrument(instrument.getId(), this);
     }
 
     @Override
-    public void updateView(Instrument instruments) {
-        if (numberOfRequests > 1) {
-            numberOfRequests--;
+    public void updateView(RequestResponseStatus status) {
+        System.out.println("number of requests: "+numberOfRequests);
+        numberOfRequests--;
+        if (numberOfRequests > 0) {
             return;
         }
+        if (status == RequestResponseStatus.TIMEOUT) {
+            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.manufacturer_edit),
+                    getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
+            if (isDeleteAction) {
+                mySnackbar.setAction(getString(R.string.retry_connection), view12 -> delete());
+            }
+            else
+                mySnackbar.setAction(getString(R.string.retry_connection), view12 -> sendRequests());
+            mySnackbar.show();
+            return;
+        } else if (status == RequestResponseStatus.FORBIDDEN) {
+            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.manufacturer_edit),
+                    getString(R.string.connection_forbidden), Snackbar.LENGTH_LONG);
+            mySnackbar.show();
+            return;
+        }else if (status == RequestResponseStatus.UNAUTHORIZED) {
+            api.refreshToken(this);
+            return;
+        }
+
         Log.i("Screen", "Go to list view from edit view");
         FragmentManager fm = getFragmentManager();
         fm.popBackStack();
+    }
+
+    @Override
+    public void onAuthentication(RequestResponseStatus status) {
+        if (isDeleteAction)
+            delete();
+        else
+            sendRequests();
     }
 }

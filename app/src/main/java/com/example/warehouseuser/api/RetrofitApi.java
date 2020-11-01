@@ -10,7 +10,6 @@ import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -37,4 +36,8 @@ public interface RetrofitApi {
     @POST("oauth/token")
     @FormUrlEncoded
     Call<TokenResponse> getAccessToken(@Field("username") String username, @Field("password") String password, @Field("grant_type") String grantType);
+
+    @POST("oauth/token")
+    @FormUrlEncoded
+    Call<TokenResponse> refreshToken(@Field("grant_type") String grantType, @Field("refresh_token") String token);
 }

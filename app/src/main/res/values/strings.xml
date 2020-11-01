@@ -1,9 +1,10 @@
 <resources>
-    <string name="app_name">WarehouseUser</string>
+    <string name="app_name">Magazyn instrumetnów</string>
     <string name="server_client_id">316169685419-dg1thmasj3o1c9rjbkqv0mjp3f0al0ms.apps.googleusercontent.com</string>
     <string name="sign_in_button">zaloguj</string>
     <string name="api_button">click me!</string>
     <string name="connection_timeout">Brak połączenia z serwerem.</string>
     <string name="retry_connection">połącz ponownie</string>
     <string name="signIn_failed">Niepoprawny login lub hasło.</string>
+    <string name="connection_forbidden">Brak uprawnień do wykonania czynności.</string>
 </resources>
