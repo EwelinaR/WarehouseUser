@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.warehouseuser.MainActivity;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
@@ -33,11 +34,12 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        ((MainActivity)getActivity()).showSignOutButtonWhichIsATextView();
+
         api = new RestApi(this.getContext());
-      //  controller.getToken(this, "Ala", "123");
         api.getInstruments(this);
 
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.add);
+        FloatingActionButton fab = getActivity().findViewById(R.id.add);
         fab.setOnClickListener(view1 -> {
             Log.i("Screen", "Go to add view");
             FragmentManager fm = getFragmentManager();
@@ -61,7 +63,7 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
             return;
         }
         InstrumentAdapter adapter = new InstrumentAdapter(getActivity(), instruments);
-        ListView listView = (ListView) getActivity().findViewById(R.id.list_view);
+        ListView listView = getActivity().findViewById(R.id.list_view);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

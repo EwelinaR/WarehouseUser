@@ -36,24 +36,24 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
     }
 
     private void initButtons() {
-        Button cancel = (Button) getActivity().findViewById(R.id.cancel);
+        Button cancel = getActivity().findViewById(R.id.cancel);
         cancel.setOnClickListener(view -> {
             FragmentManager fm = getFragmentManager();
             Log.i("Screen", "Back to list view from edit view");
             fm.popBackStack();
         });
 
-        Button save = (Button) getActivity().findViewById(R.id.save);
+        Button save = getActivity().findViewById(R.id.save);
         save.setOnClickListener(this::save);
         save.setText("Zapisz");
 
-        Button delete = (Button) getActivity().findViewById(R.id.delete);
+        Button delete = getActivity().findViewById(R.id.delete);
         delete.setOnClickListener(view -> delete());
     }
 
     private void initQuantityFields() {
-        Button increase = (Button) getActivity().findViewById(R.id.increase);
-        Button decrease = (Button) getActivity().findViewById(R.id.decrease);
+        Button increase = getActivity().findViewById(R.id.increase);
+        Button decrease = getActivity().findViewById(R.id.decrease);
 
         increase.setOnClickListener(view -> setNewQuantity(1));
         decrease.setOnClickListener(view -> setNewQuantity(-1));
@@ -142,7 +142,6 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
 
     @Override
     public void updateView(RequestResponseStatus status) {
-        System.out.println("number of requests: "+numberOfRequests);
         numberOfRequests--;
         if (numberOfRequests > 0) {
             return;

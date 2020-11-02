@@ -36,24 +36,24 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate,
     }
 
     private void initButtons() {
-        Button cancel = (Button) getActivity().findViewById(R.id.cancel);
+        Button cancel = getActivity().findViewById(R.id.cancel);
         cancel.setOnClickListener(view -> {
             FragmentManager fm = getFragmentManager();
             Log.i("Screen", "Back to list view from add view");
             fm.popBackStack();
         });
 
-        Button save = (Button) getActivity().findViewById(R.id.save);
+        Button save = getActivity().findViewById(R.id.save);
         save.setOnClickListener(this::save);
         save.setText("Dodaj");
 
-        Button delete = (Button) getActivity().findViewById(R.id.delete);
+        Button delete = getActivity().findViewById(R.id.delete);
         delete.setVisibility(View.INVISIBLE);
     }
 
     private void initQuantityFields() {
-        Button increase = (Button) getActivity().findViewById(R.id.increase);
-        Button decrease = (Button) getActivity().findViewById(R.id.decrease);
+        Button increase = getActivity().findViewById(R.id.increase);
+        Button decrease = getActivity().findViewById(R.id.decrease);
 
         increase.setVisibility(View.INVISIBLE);
         decrease.setVisibility(View.INVISIBLE);

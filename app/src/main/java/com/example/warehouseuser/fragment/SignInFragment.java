@@ -41,7 +41,7 @@ public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
     }
 
     private void initButtons() {
-        Button back = (Button) getActivity().findViewById(R.id.go_back);
+        Button back = getActivity().findViewById(R.id.go_back);
         back.setOnClickListener(view -> {
             Log.i("Screen", "Back to start view from sign in view");
             FragmentManager fm = getFragmentManager();
@@ -50,7 +50,7 @@ public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
             ft.commit();
         });
 
-        signIn = (Button) getActivity().findViewById(R.id.sign_in);
+        signIn = getActivity().findViewById(R.id.sign_in);
         signIn.setOnClickListener(view -> {
             api.getToken( this, username.getText().toString(), password.getText().toString());
         });
@@ -80,7 +80,7 @@ public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
         });
 
         emptyPassword = true;
-        password = (EditText) getActivity().findViewById(R.id.password);
+        password = getActivity().findViewById(R.id.password);
         password.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {}

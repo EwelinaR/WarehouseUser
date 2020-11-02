@@ -14,6 +14,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.warehouseuser.R;
+import com.example.warehouseuser.RequestResponseStatus;
+import com.example.warehouseuser.api.RestApi;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -21,12 +23,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 
-public class StartFragment extends Fragment {
+public class StartFragment extends Fragment implements OnAuthenticationUpdate {
 
     private static final int RC_SIGN_IN = 1;
     private static final String LOGIN_TAG = "LogIn";
     private GoogleSignInClient mGoogleSignInClient;
+    private RestApi api;
+    private GoogleSignInAccount account;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -35,6 +40,12 @@ public class StartFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        api = new RestApi(this.getContext());
+        account = GoogleSignIn.getLastSignedInAccount(this.getContext());
+        if (account != null) {
+            Log.i("LogIn", "User is already signed in with google");
+            api.getToken(this, account.getDisplayName(), account.getIdToken());
+        }
         initLogIn();
         initGoogleLogIn();
         tmpInit();
@@ -58,7 +69,7 @@ public class StartFragment extends Fragment {
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
-        SignInButton signInButton = (SignInButton) getActivity().findViewById(R.id.google_sign_in_button);
+        SignInButton signInButton = getActivity().findViewById(R.id.google_sign_in_button);
         signInButton.setOnClickListener(v -> logInWithGoogle());
     }
 
@@ -72,7 +83,6 @@ public class StartFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
@@ -81,19 +91,15 @@ public class StartFragment extends Fragment {
 
     private void handleSignInResult(@NonNull Task<GoogleSignInAccount> completedTask) {
         try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.i(LOGIN_TAG, "Successfully logged in as a  " + account.getAccount().name);
-            String idToken = account.getIdToken();
-            // TODO(developer): send ID Token to server and validate
-            // TODO updateUI(account);
+            account = completedTask.getResult(ApiException.class);
+            api.getToken(this, account.getEmail(), account.getDisplayName());
         } catch (ApiException e) {
             Log.w(LOGIN_TAG, "handleSignInResult:error", e);
-            // TODO updateUI(null);
         }
     }
 
     private void tmpInit() {
-        final Button button = (Button) getActivity().findViewById(R.id.api_button);
+        final Button button = getActivity().findViewById(R.id.api_button);
         button.setOnClickListener(v -> {
             Log.i("Screen", "TMP go to list view from start");
             FragmentManager fm = getFragmentManager();
@@ -101,5 +107,26 @@ public class StartFragment extends Fragment {
             ft.replace(R.id.fragment_placeholder, new ListFragment());
             ft.commit();
         });
+    }
+
+    @Override
+    public void onAuthentication(RequestResponseStatus status) {
+        if (status == RequestResponseStatus.OK) {
+            FragmentManager fm = getFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.fragment_placeholder, new ListFragment());
+            ft.commit();
+        } else if (status == RequestResponseStatus.BAD_CREDENTIALS) {
+            mGoogleSignInClient.signOut();
+            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.sign_in_button),
+                    getString(R.string.bad_credentials), Snackbar.LENGTH_LONG);
+            mySnackbar.show();
+        } else if (status == RequestResponseStatus.TIMEOUT) {
+            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.sign_in_button),
+                    getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
+            mySnackbar.setAction(getString(R.string.retry_connection),
+                    view12 -> api.getToken(this, account.getEmail(), account.getDisplayName()));
+            mySnackbar.show();
+        }
     }
 }

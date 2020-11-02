@@ -20,6 +20,7 @@
         android:layout_gravity="bottom|right"
         android:layout_margin="16dp"
         android:src="@drawable/ic_add"
+        app:backgroundTint="@android:color/holo_purple"
         app:layout_anchor="@id/list_view"
         app:layout_anchorGravity="bottom|right|end"
         app:fabSize="mini"/>

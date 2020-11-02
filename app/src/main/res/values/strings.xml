@@ -7,4 +7,5 @@
     <string name="retry_connection">połącz ponownie</string>
     <string name="signIn_failed">Niepoprawny login lub hasło.</string>
     <string name="connection_forbidden">Brak uprawnień do wykonania czynności.</string>
+    <string name="bad_credentials">"Brak uprawnień dla wybranego konta."</string>
 </resources>

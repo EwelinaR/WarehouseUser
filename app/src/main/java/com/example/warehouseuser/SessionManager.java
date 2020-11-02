@@ -32,4 +32,11 @@ public class SessionManager {
         editor.putString(REFRESH_TOKEN, token);
         editor.apply();
     }
+
+    public void removeData() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(ACCESS_TOKEN);
+        editor.remove(REFRESH_TOKEN);
+        editor.apply();
+    }
 }
