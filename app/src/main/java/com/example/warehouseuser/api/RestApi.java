@@ -6,9 +6,9 @@ import android.util.Log;
 import com.example.warehouseuser.AuthenticationInterceptor;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.SessionManager;
-import com.example.warehouseuser.fragment.FragmentUpdate;
-import com.example.warehouseuser.fragment.FragmentUpdateList;
-import com.example.warehouseuser.fragment.OnAuthenticationUpdate;
+import com.example.warehouseuser.fragment.update.FragmentUpdate;
+import com.example.warehouseuser.fragment.update.FragmentUpdateList;
+import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -25,6 +25,9 @@ public class RestApi {
 
     static final String BASE_URL = "http://192.168.1.132:8080/";
     private SessionManager manager;
+    private final String CLIENT_ID = "client";
+    private final String CLIENT_SECRET = "secret";
+    private final String BEARER_PREFIX = "Bearer ";
 
     public RestApi(Context context) {
         this.manager = new SessionManager(context);
@@ -56,7 +59,7 @@ public class RestApi {
     }
 
     public void getToken(OnAuthenticationUpdate update, String username, String password) {
-        String authToken = Credentials.basic("client", "secret");
+        String authToken = Credentials.basic(CLIENT_ID, CLIENT_SECRET);
 
         RetrofitApi retrofitApi = createRetrofitApi(authToken);
 
@@ -65,7 +68,7 @@ public class RestApi {
     }
 
     public void refreshToken(OnAuthenticationUpdate update) {
-        String authToken = Credentials.basic("client", "secret");
+        String authToken = Credentials.basic(CLIENT_ID, CLIENT_SECRET);
         RetrofitApi retrofitApi = createRetrofitApi(authToken);
 
         Call<TokenResponse> call = retrofitApi.refreshToken("refresh_token", manager.getRefreshToken());
@@ -73,42 +76,42 @@ public class RestApi {
     }
 
     public void getInstruments(FragmentUpdateList fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
+        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
         Call<List<Instrument>> call = retrofitApi.getInstruments();
         call.enqueue(new ListCallback(fragmentView));
     }
 
     public void editInstrument(Instrument instrument, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
+        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
         Call<Void> call = retrofitApi.updateInstrument(instrument);
         call.enqueue(new VoidCallback(fragmentView));
     }
 
     public void addInstrument(Instrument instrument, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
+        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
         Call<Void> call = retrofitApi.addInstrument(instrument);
         call.enqueue(new VoidCallback(fragmentView));
     }
 
     public void increaseQuantity(int id, int amount, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
+        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
         Call<Void> call = retrofitApi.increaseQuantity(id, amount);
         call.enqueue(new VoidCallback(fragmentView));
     }
 
     public void decreaseQuantity(int id, int amount, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
+        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
         Call<Void> call = retrofitApi.decreaseQuantity(id, amount);
         call.enqueue(new VoidCallback(fragmentView));
     }
 
     public void deleteInstrument(int index, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi("Bearer "+manager.getAccessToken());
+        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
         Call<Void> call = retrofitApi.deleteInstrument(index);
         call.enqueue(new VoidCallback(fragmentView));

@@ -14,6 +14,8 @@ import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.R;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
+import com.example.warehouseuser.fragment.update.FragmentUpdate;
+import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.material.snackbar.Snackbar;
 
 public class AddViewFragment extends DetailedFragment implements FragmentUpdate, OnAuthenticationUpdate {
@@ -62,7 +64,7 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate,
 
     private void save(View view) {
         if (!isValidData()) {
-            Snackbar.make(view, ERROR_MESSAGE, Snackbar.LENGTH_LONG)
+            Snackbar.make(view, getString(R.string.wrong_login_or_pass), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
             return;
         }

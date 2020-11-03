@@ -20,19 +20,17 @@ public class DetailedFragment extends Fragment {
     protected TextView quantity;
     protected TextView quantityDifference;
 
-    final protected String ERROR_MESSAGE = "Pola są puste lub cena jest równa zero.";
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.edit_view, parent, false);
     }
 
     protected void initEditTexts() {
-        manufacturer = (EditText) getActivity().findViewById(R.id.manufacturer_edit);
-        model = (EditText) getActivity().findViewById(R.id.model_edit);
-        price = (EditText) getActivity().findViewById(R.id.price_edit);
-        quantity = (TextView) getActivity().findViewById(R.id.quantity_amount);
-        quantityDifference = (TextView) getActivity().findViewById(R.id.quantity_edit);
+        manufacturer = getActivity().findViewById(R.id.manufacturer_edit);
+        model = getActivity().findViewById(R.id.model_edit);
+        price = getActivity().findViewById(R.id.price_edit);
+        quantity = getActivity().findViewById(R.id.quantity_amount);
+        quantityDifference = getActivity().findViewById(R.id.quantity_edit);
     }
 
     protected void initPriceField() {
@@ -44,10 +42,13 @@ public class DetailedFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence ch, int start, int before, int count) {
                 String s = ch.toString();
-                 if(s.length() > 0 && !s.matches("^(\\d{1,6})((\\.)|(\\.\\d{0,2}))?$")) {
+                 if (s.length() > 0 && !s.matches("^(\\d{1,6})((\\.)|(\\.\\d{0,2}))?$")) {
                     price.setText(s.substring(0, s.length()-1));
                     price.setSelection(price.getText().length());
-                }
+                } else if (s.length() > 1 && s.startsWith("0")) {
+                     price.setText(s.substring(1));
+                     price.setSelection(price.getText().length());
+                 }
             }
         });
     }

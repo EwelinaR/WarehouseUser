@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.warehouseuser.R;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
+import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -43,7 +44,7 @@ public class StartFragment extends Fragment implements OnAuthenticationUpdate {
         api = new RestApi(this.getContext());
         account = GoogleSignIn.getLastSignedInAccount(this.getContext());
         if (account != null) {
-            Log.i("LogIn", "User is already signed in with google");
+            Log.i(LOGIN_TAG, "User is already signed in with google");
             api.getToken(this, account.getDisplayName(), account.getIdToken());
         }
         initLogIn();
@@ -52,7 +53,7 @@ public class StartFragment extends Fragment implements OnAuthenticationUpdate {
     }
 
     private void initLogIn() {
-        final Button button = (Button) getActivity().findViewById(R.id.sign_in_button);
+        final Button button =  getActivity().findViewById(R.id.sign_in_button);
         button.setOnClickListener(v -> {
             Log.i("Screen", "Go to login view");
             FragmentManager fm = getFragmentManager();

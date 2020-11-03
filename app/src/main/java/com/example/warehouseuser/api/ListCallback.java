@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.RequestResponseStatus;
-import com.example.warehouseuser.fragment.FragmentUpdateList;
+import com.example.warehouseuser.fragment.update.FragmentUpdateList;
 
 import org.json.JSONException;
 import org.json.JSONObject;

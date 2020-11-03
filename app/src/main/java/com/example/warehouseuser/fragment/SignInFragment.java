@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.warehouseuser.R;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
+import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.material.snackbar.Snackbar;
 
 public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
@@ -59,7 +60,7 @@ public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
 
     private void initEditTextFields() {
         emptyUsername = true;
-        username = (EditText) getActivity().findViewById(R.id.username);
+        username = getActivity().findViewById(R.id.username);
         username.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {}

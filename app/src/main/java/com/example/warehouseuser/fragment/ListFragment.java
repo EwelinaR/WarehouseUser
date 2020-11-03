@@ -18,6 +18,8 @@ import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.InstrumentAdapter;
 import com.example.warehouseuser.R;
+import com.example.warehouseuser.fragment.update.FragmentUpdateList;
+import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 

@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.SessionManager;
-import com.example.warehouseuser.fragment.OnAuthenticationUpdate;
+import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 
 import org.json.JSONException;
 import org.json.JSONObject;

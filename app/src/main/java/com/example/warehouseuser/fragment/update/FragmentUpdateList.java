@@ -1,4 +1,4 @@
-package com.example.warehouseuser.fragment;
+package com.example.warehouseuser.fragment.update;
 
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.RequestResponseStatus;

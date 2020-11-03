@@ -3,7 +3,7 @@ package com.example.warehouseuser.api;
 import android.util.Log;
 
 import com.example.warehouseuser.RequestResponseStatus;
-import com.example.warehouseuser.fragment.FragmentUpdate;
+import com.example.warehouseuser.fragment.update.FragmentUpdate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
