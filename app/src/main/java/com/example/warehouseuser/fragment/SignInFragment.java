@@ -46,9 +46,7 @@ public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
         back.setOnClickListener(view -> {
             Log.i("Screen", "Back to start view from sign in view");
             FragmentManager fm = getFragmentManager();
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.fragment_placeholder, new StartFragment());
-            ft.commit();
+            fm.popBackStack();
         });
 
         signIn = getActivity().findViewById(R.id.sign_in);
@@ -108,7 +106,8 @@ public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
             Log.i("Screen", "Go to list view");
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.fragment_placeholder, new ListFragment());
+            fm.popBackStack();
+            ft.replace(R.id.fragment_placeholder, new ListFragment()).addToBackStack(null);
             ft.commit();
         }
         else if (status == RequestResponseStatus.BAD_CREDENTIALS) {

@@ -45,11 +45,10 @@ public class StartFragment extends Fragment implements OnAuthenticationUpdate {
         account = GoogleSignIn.getLastSignedInAccount(this.getContext());
         if (account != null) {
             Log.i(LOGIN_TAG, "User is already signed in with google");
-            api.getToken(this, account.getDisplayName(), account.getIdToken());
+            api.getToken(this, account.getEmail(), account.getDisplayName());
         }
         initLogIn();
         initGoogleLogIn();
-        tmpInit();
     }
 
     private void initLogIn() {
@@ -58,7 +57,7 @@ public class StartFragment extends Fragment implements OnAuthenticationUpdate {
             Log.i("Screen", "Go to login view");
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.fragment_placeholder, new SignInFragment());
+            ft.replace(R.id.fragment_placeholder, new SignInFragment()).addToBackStack(null);
             ft.commit();
         });
     }
@@ -99,17 +98,6 @@ public class StartFragment extends Fragment implements OnAuthenticationUpdate {
         }
     }
 
-    private void tmpInit() {
-        final Button button = getActivity().findViewById(R.id.api_button);
-        button.setOnClickListener(v -> {
-            Log.i("Screen", "TMP go to list view from start");
-            FragmentManager fm = getFragmentManager();
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.fragment_placeholder, new ListFragment());
-            ft.commit();
-        });
-    }
-
     @Override
     public void onAuthentication(RequestResponseStatus status) {
         if (status == RequestResponseStatus.OK) {
@@ -123,11 +111,7 @@ public class StartFragment extends Fragment implements OnAuthenticationUpdate {
                     getString(R.string.bad_credentials), Snackbar.LENGTH_LONG);
             mySnackbar.show();
         } else if (status == RequestResponseStatus.TIMEOUT) {
-            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.sign_in_button),
-                    getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
-            mySnackbar.setAction(getString(R.string.retry_connection),
-                    view12 -> api.getToken(this, account.getEmail(), account.getDisplayName()));
-            mySnackbar.show();
+            mGoogleSignInClient.signOut();
         }
     }
 }

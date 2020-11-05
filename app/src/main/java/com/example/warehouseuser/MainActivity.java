@@ -2,6 +2,7 @@ package com.example.warehouseuser;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.graphics.Color;
@@ -9,6 +10,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.example.warehouseuser.fragment.StartFragment;
@@ -26,6 +29,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initActionBar();
+
+        Window window = MainActivity.this.getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.setStatusBarColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimaryDark));
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.fragment_placeholder, new StartFragment());
@@ -45,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         actionBar.setCustomView(view, layoutParams);
 
-        ColorDrawable colorDrawable = new ColorDrawable(Color.parseColor("#FFAA66CC"));
+        ColorDrawable colorDrawable = new ColorDrawable(Color.parseColor("#6200EE"));
         actionBar.setBackgroundDrawable(colorDrawable);
 
         signOut = view.findViewById(R.id.sign_out_button);
@@ -72,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         signOut.setVisibility(View.INVISIBLE);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        getSupportFragmentManager().popBackStack();
         ft.replace(R.id.fragment_placeholder, new StartFragment());
         ft.commit();
     }
