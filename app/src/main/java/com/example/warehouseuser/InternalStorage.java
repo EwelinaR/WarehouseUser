@@ -9,45 +9,124 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class InternalStorage<T> {
+public class InternalStorage {
 
-    private final String key;
     private final Context context;
 
-    public InternalStorage(Context context, String key) {
-        this.key = key;
+    public InternalStorage(Context context) {
         this.context = context;
     }
 
-    public void removeFileContent() throws IOException {
-        context.openFileOutput(key, Context.MODE_PRIVATE).close();
+    public List<Instrument> readInstruments() {
+        try {
+            List<Instrument> instruments = new ArrayList<>();
+            FileInputStream fis = context.openFileInput(Instrument.class.getName());
+            ObjectInputStream ois = new ObjectInputStream(fis);
+
+            while (fis.available() > 0) {
+                instruments.add((Instrument) ois.readObject());
+            }
+            ois.close();
+            fis.close();
+            return instruments;
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
     }
 
-    public void writeObject(T object) throws IOException {
-        FileOutputStream fos = context.openFileOutput(key, Context.MODE_PRIVATE | Context.MODE_APPEND);
+    public List<UpdateInstrument> readUpdates() {
+        List<UpdateInstrument> instruments = new ArrayList<>();
+        try {
+            FileInputStream fis = context.openFileInput(UpdateInstrument.class.getName());
+            ObjectInputStream ois = new ObjectInputStream(fis);
+
+            while (fis.available() > 0) {
+                instruments.add((UpdateInstrument) ois.readObject());
+            }
+
+            ois.close();
+            fis.close();
+            return instruments;
+        } catch (IOException | ClassNotFoundException e) {
+            return instruments;
+        }
+    }
+
+    public void deleteUpdates() {
+        context.deleteFile(UpdateInstrument.class.getName());
+        System.out.println("DELETEEEED");
+    }
+
+    public void addInstrument(Instrument instrument)  throws IOException {
+        List<Instrument> instruments = readInstruments();
+        int id;
+        try {
+            id = instruments.get(instruments.size() - 1).getId();
+        } catch (NullPointerException e) {
+            id = 0;
+        }
+
+        instrument.setId(id);
+        instruments.add(instrument);
+        writeInstruments(instruments);
+
+        writeUpdate(new UpdateInstrument("POST", instrument, 0));
+    }
+
+    public void deleteInstrument(Instrument instrument) throws IOException {
+        List<Instrument> instruments = readInstruments().stream()
+                .filter(i -> i.getId() != instrument.getId()).collect(Collectors.toList());
+
+        writeInstruments(instruments);
+        writeUpdate(new UpdateInstrument("DELETE", instrument, 0));
+    }
+
+    public void updateInstrument(Instrument instrument) throws IOException {
+        List<Instrument> instruments = readInstruments();
+        instruments.forEach(i -> {
+            if (i.getId() == instrument.getId()) {
+                if (instrument.getManufacturer() != null) i.setManufacturer(instrument.getManufacturer());
+                if (instrument.getModel() != null) i.setModel(instrument.getModel());
+                if (instrument.getPrice() > 0) i.setPrice(instrument.getPrice());
+            }});
+
+        writeInstruments(instruments);
+        writeUpdate(new UpdateInstrument("PUT", instrument, 0));
+    }
+
+    public void changeAmountOfInstrument(int id, int amount) throws IOException {
+        List<Instrument> instruments = readInstruments();
+        instruments.forEach(i -> {
+            if (i.getId() == id) {
+                i.setQuantity(i.getQuantity()+amount);
+            }});
+
+        writeInstruments(instruments);
+        writeUpdate(new UpdateInstrument("PUT", null, amount));
+    }
+
+    public void writeInstruments(List<Instrument> instruments) throws IOException {
+        FileOutputStream fos = context.openFileOutput(Instrument.class.getName(), Context.MODE_PRIVATE);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
-        oos.writeObject(object);
+        for (Instrument instrument: instruments) {
+            oos.writeObject(instrument);
+        }
         oos.close();
         fos.close();
     }
 
-    public List<T> readAllObjects() throws IOException, ClassNotFoundException {
-        List<T> objects = new ArrayList<>();
+    private void writeUpdate(UpdateInstrument updateInstrument) throws IOException {
+        List<UpdateInstrument> instruments = readUpdates();
+        instruments.add(updateInstrument);
 
-        FileInputStream fis = context.openFileInput(key);
-        ObjectInputStream ois = new ObjectInputStream(fis);
-
-        while (fis.available() > 0) {
-            objects.add((T) ois.readObject());
+        FileOutputStream fos = context.openFileOutput(UpdateInstrument.class.getName(), Context.MODE_PRIVATE);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        for (UpdateInstrument instrument: instruments) {
+            oos.writeObject(instrument);
         }
-        return objects;
-    }
-
-    public T readObject() throws IOException, ClassNotFoundException {
-        FileInputStream fis = context.openFileInput(key);
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        T object = (T) ois.readObject();
-        return object;
+        oos.close();
+        fos.close();
     }
 }

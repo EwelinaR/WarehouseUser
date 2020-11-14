@@ -12,8 +12,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.warehouseuser.fragment.ListFragment;
 import com.example.warehouseuser.fragment.StartFragment;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -22,6 +24,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 public class MainActivity extends AppCompatActivity {
 
     private TextView signOut;
+    private ImageView sync;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +59,17 @@ public class MainActivity extends AppCompatActivity {
         ColorDrawable colorDrawable = new ColorDrawable(Color.parseColor("#6200EE"));
         actionBar.setBackgroundDrawable(colorDrawable);
 
+        sync = view.findViewById(R.id.sync_button);
+        sync.setVisibility(View.INVISIBLE);
+        sync.setOnClickListener(this::sync);
+
         signOut = view.findViewById(R.id.sign_out_button);
         signOut.setVisibility(View.INVISIBLE);
         signOut.setOnClickListener(this::onOptionsItemSelected);
     }
 
-    public void showSignOutButtonWhichIsATextView() {
+    public void displayButtonsAfterSignIn() {
+        sync.setVisibility(View.VISIBLE);
         signOut.setVisibility(View.VISIBLE);
     }
 
@@ -78,10 +86,18 @@ public class MainActivity extends AppCompatActivity {
         manager.removeData();
 
         signOut.setVisibility(View.INVISIBLE);
+        sync.setVisibility(View.INVISIBLE);
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         getSupportFragmentManager().popBackStack();
         ft.replace(R.id.fragment_placeholder, new StartFragment());
+        ft.commit();
+    }
+
+    public void sync(View view) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        getSupportFragmentManager().popBackStack();
+        ft.replace(R.id.fragment_placeholder, new ListFragment(true));
         ft.commit();
     }
 }

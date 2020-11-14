@@ -7,6 +7,8 @@ import android.widget.Button;
 
 import androidx.fragment.app.FragmentManager;
 
+import com.example.warehouseuser.InternalStorage;
+import com.example.warehouseuser.MainActivity;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
@@ -14,6 +16,8 @@ import com.example.warehouseuser.R;
 import com.example.warehouseuser.fragment.update.FragmentUpdate;
 import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.io.IOException;
 
 public class EditFragment extends DetailedFragment implements FragmentUpdate, OnAuthenticationUpdate {
 
@@ -88,8 +92,29 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
             return;
         }
         isDeleteAction = false;
-        checkDataChanges();
+        Instrument instrument = checkDataChanges();
+
+        saveUpdateToInternalStorage(instrument);
         sendRequests();
+    }
+
+    private void saveUpdateToInternalStorage(Instrument instrument) {
+        InternalStorage storage = new InternalStorage((MainActivity)getContext());
+        if (isDataChanged) {
+            try {
+                storage.updateInstrument(instrument);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        int amount = Integer.parseInt(quantityDifference.getText().toString());
+        if (amount != 0) {
+            try {
+                storage.changeAmountOfInstrument(instrument.getId(), amount);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void sendRequests() {
@@ -106,7 +131,6 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
         if (isDataChanged) {
             api.editInstrument(instrument, this);
             numberOfRequests++;
-            System.out.println("DATA CHANGED");
         }
 
         if (numberOfRequests == 0) {
@@ -115,30 +139,44 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
         }
     }
 
-    private void checkDataChanges() {
+    private Instrument checkDataChanges() {
+        String changedManufacturer = null;
+        String changedModel = null;
+        float changedPrice = -1;
         isDataChanged = false;
         if (!instrument.getManufacturer().equals(manufacturer.getText().toString())) {
-            instrument.setManufacturer(manufacturer.getText().toString());
+            changedManufacturer = manufacturer.getText().toString();
+            instrument.setManufacturer(changedManufacturer);
             isDataChanged = true;
         }
         if (!instrument.getModel().equals(model.getText().toString())) {
-            instrument.setModel(model.getText().toString());
+            changedModel = model.getText().toString();
+            instrument.setModel(changedModel);
             isDataChanged = true;
         }
         if (instrument.getPrice() != Float.parseFloat(price.getText().toString())) {
             if (price.getText().toString().endsWith(".")) {
-                String correctedPrice = price.getText().subSequence(0, price.getText().length()-1).toString();
-                instrument.setPrice(Float.parseFloat(correctedPrice));
+                changedPrice = Float.parseFloat(price.getText().subSequence(0, price.getText().length()-1).toString());
             } else {
-                instrument.setPrice(Float.parseFloat(price.getText().toString()));
+                changedPrice = Float.parseFloat(price.getText().toString());
             }
+            instrument.setPrice(changedPrice);
             isDataChanged = true;
         }
+        return new Instrument(instrument.getId(), changedManufacturer, changedModel, changedPrice, -1);
     }
 
     private void delete() {
         isDeleteAction = true;
         numberOfRequests++;
+
+        InternalStorage storage = new InternalStorage((MainActivity)getContext());
+        try {
+            storage.deleteInstrument(instrument);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         api.deleteInstrument(instrument.getId(), this);
     }
 

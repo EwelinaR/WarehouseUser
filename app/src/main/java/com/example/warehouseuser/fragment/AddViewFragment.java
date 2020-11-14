@@ -11,12 +11,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.R;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.fragment.update.FragmentUpdate;
 import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.io.IOException;
 
 public class AddViewFragment extends DetailedFragment implements FragmentUpdate, OnAuthenticationUpdate {
 
@@ -76,6 +79,13 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate,
                 Float.parseFloat(price.getText().toString()),
                 0);
 
+        InternalStorage storage = new InternalStorage(requireContext());
+        try {
+            storage.addInstrument(newInstrument);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         api.addInstrument(newInstrument, this);
     }
 
@@ -94,7 +104,7 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate,
         Log.i("Screen", "Go to list view from add view");
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.fragment_placeholder, new ListFragment());
+        ft.replace(R.id.fragment_placeholder, new ListFragment(false));
         ft.commit();
     }
 

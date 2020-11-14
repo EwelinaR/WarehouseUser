@@ -30,6 +30,11 @@ import java.util.List;
 public class ListFragment extends Fragment implements FragmentUpdateList, OnAuthenticationUpdate {
 
     private RestApi api;
+    private boolean syncDataWithServer;
+
+    public ListFragment(boolean syncDataWithServer) {
+        this.syncDataWithServer = syncDataWithServer;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -38,11 +43,10 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        ((MainActivity)getActivity()).showSignOutButtonWhichIsATextView();
+        ((MainActivity)getActivity()).displayButtonsAfterSignIn();
         api = new RestApi(this.getContext());
 
         getInstruments();
-
 
         FloatingActionButton fab = getActivity().findViewById(R.id.add);
         fab.setOnClickListener(view1 -> {
@@ -55,14 +59,19 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
     }
 
     private void getInstruments() {
-        try {
-            InternalStorage<List<Instrument>> storage = new InternalStorage<>(requireContext(), Instrument.class.toString());
-            List<Instrument> instruments = storage.readObject();
-            displayInstruments(instruments);
-            Log.i("Storage", "Uses data from local storage");
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+        InternalStorage storage = new InternalStorage(requireContext());
+        if (syncDataWithServer) {
             api.getInstruments(this);
+            storage.deleteUpdates();
+            syncDataWithServer = false;
+        } else {
+            List<Instrument> instruments = storage.readInstruments();
+            if (instruments == null) {
+                api.getInstruments(this);
+            } else {
+                displayInstruments(instruments);
+                Log.i("Storage", "Uses data from local storage");
+            }
         }
     }
 
@@ -101,10 +110,9 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
     }
 
     private void saveInstruments(List<Instrument> instruments) {
-        InternalStorage<List<Instrument>> storage = new InternalStorage<>(requireContext(), Instrument.class.toString());
+        InternalStorage storage = new InternalStorage(requireContext());
         try {
-            storage.removeFileContent();
-            storage.writeObject(instruments);
+            storage.writeInstruments(instruments);
             Log.i("Storage", "Saved data to local storage");
         } catch (IOException e) {
             e.printStackTrace();

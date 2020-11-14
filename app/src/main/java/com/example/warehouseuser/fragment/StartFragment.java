@@ -103,7 +103,7 @@ public class StartFragment extends Fragment implements OnAuthenticationUpdate {
         if (status == RequestResponseStatus.OK) {
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.fragment_placeholder, new ListFragment());
+            ft.replace(R.id.fragment_placeholder, new ListFragment(false));
             ft.commit();
         } else if (status == RequestResponseStatus.BAD_CREDENTIALS) {
             mGoogleSignInClient.signOut();
