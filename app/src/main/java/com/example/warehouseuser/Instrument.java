@@ -1,6 +1,8 @@
 package com.example.warehouseuser;
 
-public class Instrument {
+import java.io.Serializable;
+
+public class Instrument implements Serializable {
     private int id;
     private String manufacturer;
     private String model;
