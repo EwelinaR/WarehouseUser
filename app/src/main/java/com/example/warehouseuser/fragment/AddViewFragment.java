@@ -8,23 +8,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.R;
-import com.example.warehouseuser.RequestResponseStatus;
-import com.example.warehouseuser.api.RestApi;
-import com.example.warehouseuser.fragment.update.FragmentUpdate;
-import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 
-public class AddViewFragment extends DetailedFragment implements FragmentUpdate, OnAuthenticationUpdate {
-
-    private RestApi api;
-    private Instrument newInstrument;
+public class AddViewFragment extends DetailedFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -37,7 +29,6 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate,
         initPriceField();
         initQuantityFields();
         initButtons();
-        api = new RestApi(this.getContext());
     }
 
     private void initButtons() {
@@ -72,7 +63,7 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate,
             return;
         }
         Log.i("Screen", "Go to list view from add view");
-        newInstrument = new Instrument(
+        Instrument newInstrument = new Instrument(
                 0,
                 manufacturer.getText().toString(),
                 model.getText().toString(),
@@ -85,31 +76,12 @@ public class AddViewFragment extends DetailedFragment implements FragmentUpdate,
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        api.addInstrument(newInstrument, this);
+        goToListView();
     }
 
-    @Override
-    public void updateView(RequestResponseStatus status) {
-        if (status == RequestResponseStatus.TIMEOUT) {
-            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.manufacturer_edit),
-                    getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
-            mySnackbar.setAction(getString(R.string.retry_connection), view12 -> api.addInstrument(newInstrument, this));
-            mySnackbar.show();
-            return;
-        } else if (status == RequestResponseStatus.UNAUTHORIZED) {
-            api.refreshToken(this);
-            return;
-        }
+    private void goToListView() {
         Log.i("Screen", "Go to list view from add view");
         FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.fragment_placeholder, new ListFragment(false));
-        ft.commit();
-    }
-
-    @Override
-    public void onAuthentication(RequestResponseStatus status) {
-        api.addInstrument(newInstrument, this);
+        fm.popBackStack();
     }
 }

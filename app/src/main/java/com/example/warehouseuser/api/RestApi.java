@@ -87,41 +87,6 @@ public class RestApi implements FragmentUpdate {
         call.enqueue(new ListCallback(fragmentView));
     }
 
-    public void editInstrument(Instrument instrument, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
-
-        Call<Void> call = retrofitApi.updateInstrument(instrument);
-        call.enqueue(new VoidCallback(fragmentView));
-    }
-
-    public void addInstrument(Instrument instrument, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
-
-        Call<Void> call = retrofitApi.addInstrument(instrument);
-        call.enqueue(new VoidCallback(fragmentView));
-    }
-
-    public void increaseQuantity(int id, int amount, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
-
-        Call<Void> call = retrofitApi.increaseQuantity(id, amount);
-        call.enqueue(new VoidCallback(fragmentView));
-    }
-
-    public void decreaseQuantity(int id, int amount, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
-
-        Call<Void> call = retrofitApi.decreaseQuantity(id, amount);
-        call.enqueue(new VoidCallback(fragmentView));
-    }
-
-    public void deleteInstrument(int index, FragmentUpdate fragmentView) {
-        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
-
-        Call<Void> call = retrofitApi.deleteInstrument(index);
-        call.enqueue(new VoidCallback(fragmentView));
-    }
-
     public void sendUpdates(List<UpdateInstrument> updateInstruments, FragmentUpdate observer) {
         RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
         Call<Void> call;

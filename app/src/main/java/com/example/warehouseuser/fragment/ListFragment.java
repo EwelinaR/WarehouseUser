@@ -30,11 +30,6 @@ import java.util.List;
 public class ListFragment extends Fragment implements FragmentUpdateList, OnAuthenticationUpdate {
 
     private RestApi api;
-    private boolean syncDataWithServer;
-
-    public ListFragment(boolean syncDataWithServer) {
-        this.syncDataWithServer = syncDataWithServer;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -60,18 +55,12 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
 
     private void getInstruments() {
         InternalStorage storage = new InternalStorage(requireContext());
-        if (syncDataWithServer) {
+        List<Instrument> instruments = storage.readInstruments();
+        if (instruments == null) {
             api.getInstruments(this);
-            storage.deleteUpdates();
-            syncDataWithServer = false;
         } else {
-            List<Instrument> instruments = storage.readInstruments();
-            if (instruments == null) {
-                api.getInstruments(this);
-            } else {
-                displayInstruments(instruments);
-                Log.i("Storage", "Uses data from local storage");
-            }
+            displayInstruments(instruments);
+            Log.i("Storage", "Uses data from local storage");
         }
     }
 

@@ -54,8 +54,9 @@ public class InternalStorage {
         }
     }
 
-    public void deleteUpdates() {
+    public void deleteData() {
         context.deleteFile(UpdateInstrument.class.getName());
+        context.deleteFile(Instrument.class.getName());
     }
 
     public void addInstrument(Instrument instrument)  throws IOException {

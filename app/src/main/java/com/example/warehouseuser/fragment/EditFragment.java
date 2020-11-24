@@ -9,23 +9,16 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.MainActivity;
-import com.example.warehouseuser.RequestResponseStatus;
-import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.R;
-import com.example.warehouseuser.fragment.update.FragmentUpdate;
-import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 
-public class EditFragment extends DetailedFragment implements FragmentUpdate, OnAuthenticationUpdate {
+public class EditFragment extends DetailedFragment {
 
-    private RestApi api;
     private final Instrument instrument;
-    private int numberOfRequests = 0;
     private boolean isDataChanged;
-    private boolean isDeleteAction;
 
     public EditFragment(Instrument instrument) {
         this.instrument = instrument;
@@ -38,7 +31,6 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
         initQuantityFields();
         initButtons();
         setInstrument();
-        api = new RestApi(this.getContext());
     }
 
     private void initButtons() {
@@ -86,19 +78,17 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
     }
 
     private void save(View view) {
-        if (!isValidData()) {
+        if (isValidData()) {
+            saveUpdateToInternalStorage();
+            goToListView();
+        } else {
             Snackbar.make(view, getString(R.string.wrong_login_or_pass), Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
-            return;
         }
-        isDeleteAction = false;
-        Instrument instrument = checkDataChanges();
-
-        saveUpdateToInternalStorage(instrument);
-        sendRequests();
     }
 
-    private void saveUpdateToInternalStorage(Instrument instrument) {
+    private void saveUpdateToInternalStorage() {
+        Instrument instrument = getDataChanges();
         InternalStorage storage = new InternalStorage((MainActivity)getContext());
         if (isDataChanged) {
             try {
@@ -117,29 +107,7 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
         }
     }
 
-    private void sendRequests() {
-        int amount = Integer.parseInt(quantityDifference.getText().toString());
-        if (amount > 0) {
-            api.increaseQuantity(instrument.getId(), amount, this);
-            numberOfRequests++;
-        }
-        else if (amount < 0) {
-            api.decreaseQuantity(instrument.getId(), -amount, this);
-            numberOfRequests++;
-        }
-
-        if (isDataChanged) {
-            api.editInstrument(instrument, this);
-            numberOfRequests++;
-        }
-
-        if (numberOfRequests == 0) {
-            FragmentManager fm = getFragmentManager();
-            fm.popBackStack();
-        }
-    }
-
-    private Instrument checkDataChanges() {
+    private Instrument getDataChanges() {
         String changedManufacturer = null;
         String changedModel = null;
         float changedPrice = -1;
@@ -167,55 +135,18 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
     }
 
     private void delete() {
-        isDeleteAction = true;
-        numberOfRequests++;
-
         InternalStorage storage = new InternalStorage((MainActivity)getContext());
         try {
             storage.deleteInstrument(instrument);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        api.deleteInstrument(instrument.getId(), this);
+        goToListView();
     }
 
-    @Override
-    public void updateView(RequestResponseStatus status) {
-        numberOfRequests--;
-        if (numberOfRequests > 0) {
-            return;
-        }
-        if (status == RequestResponseStatus.TIMEOUT) {
-            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.manufacturer_edit),
-                    getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
-            if (isDeleteAction) {
-                mySnackbar.setAction(getString(R.string.retry_connection), view12 -> delete());
-            }
-            else
-                mySnackbar.setAction(getString(R.string.retry_connection), view12 -> sendRequests());
-            mySnackbar.show();
-            return;
-        } else if (status == RequestResponseStatus.FORBIDDEN) {
-            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.manufacturer_edit),
-                    getString(R.string.connection_forbidden), Snackbar.LENGTH_LONG);
-            mySnackbar.show();
-            return;
-        }else if (status == RequestResponseStatus.UNAUTHORIZED) {
-            api.refreshToken(this);
-            return;
-        }
-
+    private void goToListView() {
         Log.i("Screen", "Go to list view from edit view");
         FragmentManager fm = getFragmentManager();
         fm.popBackStack();
-    }
-
-    @Override
-    public void onAuthentication(RequestResponseStatus status) {
-        if (isDeleteAction)
-            delete();
-        else
-            sendRequests();
     }
 }
