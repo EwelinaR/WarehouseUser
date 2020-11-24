@@ -22,7 +22,7 @@ import java.io.IOException;
 public class EditFragment extends DetailedFragment implements FragmentUpdate, OnAuthenticationUpdate {
 
     private RestApi api;
-    private Instrument instrument;
+    private final Instrument instrument;
     private int numberOfRequests = 0;
     private boolean isDataChanged;
     private boolean isDeleteAction;
@@ -110,7 +110,7 @@ public class EditFragment extends DetailedFragment implements FragmentUpdate, On
         int amount = Integer.parseInt(quantityDifference.getText().toString());
         if (amount != 0) {
             try {
-                storage.changeAmountOfInstrument(instrument.getId(), amount);
+                storage.changeAmountOfInstrument(instrument, amount);
             } catch (IOException e) {
                 e.printStackTrace();
             }

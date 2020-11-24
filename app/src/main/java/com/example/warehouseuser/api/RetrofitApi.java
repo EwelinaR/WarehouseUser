@@ -13,6 +13,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface RetrofitApi {
     @GET("instruments")
@@ -23,6 +24,9 @@ public interface RetrofitApi {
 
     @PUT("instruments")
     Call<Void> updateInstrument(@Body Instrument instrument);
+
+    @PUT("instruments/v2/")
+    Call<Void> updateInstrument(@Body Instrument instrument, @Query("timestamp") Long date);
 
     @PUT("instruments/increase/{id}/{amount}")
     Call<Void> increaseQuantity(@Path("id") int id, @Path("amount") int amount);

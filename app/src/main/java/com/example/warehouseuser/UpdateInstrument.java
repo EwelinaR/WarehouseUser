@@ -4,19 +4,25 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class UpdateInstrument implements Serializable {
-    Date date;
-    String requestType;
-    Instrument instrument;
-    int amount;
+    private final long date;
+    private final String requestType;
+    private final Instrument instrument;
+    private int amount;
 
     public UpdateInstrument(String requestType, Instrument instrument, int amount) {
-        this.date = new Date();
+        this.date = new Date().getTime();
         this.requestType = requestType;
         this.instrument = instrument;
         this.amount = amount;
     }
 
-    public Date getDate() {
+    public UpdateInstrument(String requestType, Instrument instrument) {
+        this.date = new Date().getTime();
+        this.requestType = requestType;
+        this.instrument = instrument;
+    }
+
+    public long getDate() {
         return date;
     }
 

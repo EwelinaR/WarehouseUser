@@ -5,7 +5,9 @@ import android.util.Log;
 
 import com.example.warehouseuser.AuthenticationInterceptor;
 import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.SessionManager;
+import com.example.warehouseuser.UpdateInstrument;
 import com.example.warehouseuser.fragment.update.FragmentUpdate;
 import com.example.warehouseuser.fragment.update.FragmentUpdateList;
 import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
@@ -21,13 +23,16 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class RestApi {
+public class RestApi implements FragmentUpdate {
 
     static final String BASE_URL = "http://192.168.1.132:8080/";
-    private SessionManager manager;
+    private final SessionManager manager;
     private final String CLIENT_ID = "client";
     private final String CLIENT_SECRET = "secret";
     private final String BEARER_PREFIX = "Bearer ";
+
+    private int updateAmount;
+    private FragmentUpdate observer;
 
     public RestApi(Context context) {
         this.manager = new SessionManager(context);
@@ -115,5 +120,42 @@ public class RestApi {
 
         Call<Void> call = retrofitApi.deleteInstrument(index);
         call.enqueue(new VoidCallback(fragmentView));
+    }
+
+    public void sendUpdates(List<UpdateInstrument> updateInstruments, FragmentUpdate observer) {
+        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
+        Call<Void> call;
+        this.observer = observer;
+        updateAmount = updateInstruments.size();
+        for (UpdateInstrument updateInstrument: updateInstruments) {
+            call = null;
+            switch (updateInstrument.getRequestType()) {
+                case "POST":
+                    call = retrofitApi.addInstrument(updateInstrument.getInstrument());
+                    break;
+                case "PUT":
+                    call = retrofitApi.updateInstrument(updateInstrument.getInstrument(), updateInstrument.getDate());
+                    break;
+                case "DELETE":
+                    call = retrofitApi.deleteInstrument(updateInstrument.getInstrument().getId());
+                    break;
+                case "INCREASE":
+                    call = retrofitApi.increaseQuantity(updateInstrument.getInstrument().getId(), updateInstrument.getAmount());
+                    break;
+                case "DECREASE":
+                    call = retrofitApi.decreaseQuantity(updateInstrument.getInstrument().getId(), updateInstrument.getAmount());
+                    break;
+            }
+            if (call != null)
+                call.enqueue(new VoidCallback(this));
+        }
+    }
+
+    @Override
+    public void updateView(RequestResponseStatus status) {
+        updateAmount--;
+        if (updateAmount == 0) {
+            observer.updateView(status);
+        }
     }
 }

@@ -56,7 +56,6 @@ public class InternalStorage {
 
     public void deleteUpdates() {
         context.deleteFile(UpdateInstrument.class.getName());
-        System.out.println("DELETEEEED");
     }
 
     public void addInstrument(Instrument instrument)  throws IOException {
@@ -72,7 +71,7 @@ public class InternalStorage {
         instruments.add(instrument);
         writeInstruments(instruments);
 
-        writeUpdate(new UpdateInstrument("POST", instrument, 0));
+        writeUpdate(new UpdateInstrument("POST", instrument));
     }
 
     public void deleteInstrument(Instrument instrument) throws IOException {
@@ -80,7 +79,7 @@ public class InternalStorage {
                 .filter(i -> i.getId() != instrument.getId()).collect(Collectors.toList());
 
         writeInstruments(instruments);
-        writeUpdate(new UpdateInstrument("DELETE", instrument, 0));
+        writeUpdate(new UpdateInstrument("DELETE", instrument));
     }
 
     public void updateInstrument(Instrument instrument) throws IOException {
@@ -93,18 +92,19 @@ public class InternalStorage {
             }});
 
         writeInstruments(instruments);
-        writeUpdate(new UpdateInstrument("PUT", instrument, 0));
+        writeUpdate(new UpdateInstrument("PUT", instrument));
     }
 
-    public void changeAmountOfInstrument(int id, int amount) throws IOException {
+    public void changeAmountOfInstrument(Instrument instrument, int amount) throws IOException {
         List<Instrument> instruments = readInstruments();
         instruments.forEach(i -> {
-            if (i.getId() == id) {
+            if (i.getId() == instrument.getId()) {
                 i.setQuantity(i.getQuantity()+amount);
             }});
 
         writeInstruments(instruments);
-        writeUpdate(new UpdateInstrument("PUT", null, amount));
+        String requestType = amount > 0 ? "INCREASE" : "DECREASE";
+        writeUpdate(new UpdateInstrument(requestType, instrument, amount));
     }
 
     public void writeInstruments(List<Instrument> instruments) throws IOException {

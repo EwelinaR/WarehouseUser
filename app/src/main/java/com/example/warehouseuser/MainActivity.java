@@ -15,13 +15,17 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.fragment.ListFragment;
 import com.example.warehouseuser.fragment.StartFragment;
+import com.example.warehouseuser.fragment.update.FragmentUpdate;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements FragmentUpdate {
 
     private TextView signOut;
     private ImageView sync;
@@ -95,6 +99,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void sync(View view) {
+        InternalStorage storage = new InternalStorage(this);
+        List<UpdateInstrument> updateInstruments = storage.readUpdates();
+        RestApi api = new RestApi(this);
+        api.sendUpdates(updateInstruments, this);
+    }
+
+    @Override
+    public void updateView(RequestResponseStatus status) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         getSupportFragmentManager().popBackStack();
         ft.replace(R.id.fragment_placeholder, new ListFragment(true));
