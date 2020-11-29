@@ -11,29 +11,37 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class VoidCallback implements Callback<Void> {
+public class SimpleCallback implements Callback<ResponseBody> {
 
-    private FragmentUpdate fragment;
+    private final FragmentUpdate fragment;
 
-    public VoidCallback(FragmentUpdate fragmentView) {
+    public SimpleCallback(FragmentUpdate fragmentView) {
         this.fragment = fragmentView;
     }
 
     @Override
-    public void onResponse(Call<Void> call, Response<Void> response) {
+    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
         Log.i("API", "CODE: "+response.code());
+
+        String message = "";
+        try {
+            message = response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         if(response.isSuccessful()) {
             Log.i("API", "Request successful");
-            fragment.updateView(RequestResponseStatus.OK);
+            fragment.updateView(RequestResponseStatus.OK, message);
         } else if (response.code() == 401) {
-            fragment.updateView(RequestResponseStatus.UNAUTHORIZED);
+            fragment.updateView(RequestResponseStatus.UNAUTHORIZED, message);
         } else if (response.code() == 403) {
-            fragment.updateView(RequestResponseStatus.FORBIDDEN);
+            fragment.updateView(RequestResponseStatus.FORBIDDEN, message);
         } else {
             try {
                 JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -45,10 +53,10 @@ public class VoidCallback implements Callback<Void> {
     }
 
     @Override
-    public void onFailure(Call<Void> call, Throwable t) {
+    public void onFailure(Call<ResponseBody> call, Throwable t) {
         if (t instanceof SocketTimeoutException) {
             Log.e("Connection", "SocketTimeoutException");
-            fragment.updateView(RequestResponseStatus.TIMEOUT);
+            fragment.updateView(RequestResponseStatus.TIMEOUT, "");
         } else {
             t.printStackTrace();
         }

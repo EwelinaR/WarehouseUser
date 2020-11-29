@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -89,7 +90,7 @@ public class RestApi implements FragmentUpdate {
 
     public void sendUpdates(List<UpdateInstrument> updateInstruments, FragmentUpdate observer) {
         RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
-        Call<Void> call;
+        Call<ResponseBody> call;
         this.observer = observer;
         updateAmount = updateInstruments.size();
         for (UpdateInstrument updateInstrument: updateInstruments) {
@@ -112,15 +113,18 @@ public class RestApi implements FragmentUpdate {
                     break;
             }
             if (call != null)
-                call.enqueue(new VoidCallback(this));
+                call.enqueue(new SimpleCallback(this));
         }
     }
 
+    private String updateMessage = "";
     @Override
-    public void updateView(RequestResponseStatus status) {
+    public void updateView(RequestResponseStatus status, String message) {
+        updateMessage += message+"\n";
         updateAmount--;
         if (updateAmount == 0) {
-            observer.updateView(status);
+            observer.updateView(status, updateMessage);
+            updateMessage = "";
         }
     }
 }

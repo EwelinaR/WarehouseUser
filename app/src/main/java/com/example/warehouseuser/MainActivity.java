@@ -5,15 +5,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.example.warehouseuser.api.RestApi;
@@ -115,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
     }
 
     @Override
-    public void updateView(RequestResponseStatus status) {
+    public void updateView(RequestResponseStatus status, String message) {
         if (status == RequestResponseStatus.TIMEOUT) {
             Snackbar mySnackbar = Snackbar.make(findViewById(R.id.list_view),
                     getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
@@ -127,11 +131,11 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
             api.refreshToken(this);
             return;
         }
-
         InternalStorage storage = new InternalStorage(this);
         storage.deleteData();
 
         goToListFragment();
+        showPopup(message);
     }
 
     private void goToListFragment() {
@@ -139,6 +143,22 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
         getSupportFragmentManager().popBackStack();
         ft.replace(R.id.fragment_placeholder, new ListFragment());
         ft.commit();
+    }
+
+    private void showPopup(String message) {
+        Log.w("CONFLICT MESSAGE: ", message);
+        LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View customView = layoutInflater.inflate(R.layout.conflict_popup, null);
+
+        PopupWindow popupWindow = new PopupWindow(customView, WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT);
+        popupWindow.showAtLocation(findViewById(R.id.list_view), Gravity.CENTER, 0, 0);
+
+        TextView popupText = customView.findViewById(R.id.popupText);
+        popupText.setText(message);
+
+        Button closePopup = (Button) customView.findViewById(R.id.closePopup);
+        closePopup.setOnClickListener(v -> popupWindow.dismiss());
     }
 
     @Override
