@@ -1,6 +1,7 @@
 package com.example.warehouseuser.api;
 
 import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.UserInfo;
 
 import java.util.List;
 
@@ -26,8 +27,8 @@ public interface RetrofitApi {
     @PUT("instruments")
     Call<Void> updateInstrument(@Body Instrument instrument);
 
-    @PUT("instruments/v2/")
-    Call<ResponseBody> updateInstrument(@Body Instrument instrument, @Query("timestamp") Long date);
+    @PUT("instruments/v2/{id}")
+    Call<ResponseBody> updateInstrument(@Path("id") long id, @Body Instrument instrument, @Query("timestamp") Long date);
 
     @PUT("instruments/increase/{id}/{amount}")
     Call<ResponseBody> increaseQuantity(@Path("id") int id, @Path("amount") int amount);
@@ -45,4 +46,7 @@ public interface RetrofitApi {
     @POST("oauth/token")
     @FormUrlEncoded
     Call<TokenResponse> refreshToken(@Field("grant_type") String grantType, @Field("refresh_token") String token);
+
+    @POST("oauth/check_token")
+    Call<UserInfo> getUserInfo(@Query("token") String token);
 }

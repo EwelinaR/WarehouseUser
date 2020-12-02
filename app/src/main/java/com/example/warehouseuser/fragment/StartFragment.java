@@ -101,6 +101,7 @@ public class StartFragment extends Fragment implements OnAuthenticationUpdate {
     @Override
     public void onAuthentication(RequestResponseStatus status) {
         if (status == RequestResponseStatus.OK) {
+            api.saveUserRole();
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             ft.replace(R.id.fragment_placeholder, new ListFragment());

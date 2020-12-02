@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -120,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
 
     @Override
     public void updateView(RequestResponseStatus status, String message) {
+        // TODO should the status be checked here?
         if (status == RequestResponseStatus.TIMEOUT) {
             Snackbar mySnackbar = Snackbar.make(findViewById(R.id.list_view),
                     getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
@@ -150,14 +150,13 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
         LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View customView = layoutInflater.inflate(R.layout.conflict_popup, null);
 
-        PopupWindow popupWindow = new PopupWindow(customView, WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT);
-        popupWindow.showAtLocation(findViewById(R.id.list_view), Gravity.CENTER, 0, 0);
+        PopupWindow popupWindow = new PopupWindow(customView, 800, 1200);
+        popupWindow.showAtLocation(findViewById(R.id.fragment_placeholder), Gravity.CENTER, 0, 0);
 
-        TextView popupText = customView.findViewById(R.id.popupText);
+        TextView popupText = customView.findViewById(R.id.popup_text);
         popupText.setText(message);
 
-        Button closePopup = (Button) customView.findViewById(R.id.closePopup);
+        ImageView closePopup = customView.findViewById(R.id.close_popup);
         closePopup.setOnClickListener(v -> popupWindow.dismiss());
     }
 

@@ -104,6 +104,7 @@ public class SignInFragment extends Fragment implements OnAuthenticationUpdate {
     public void onAuthentication(RequestResponseStatus status) {
         if (status == RequestResponseStatus.OK) {
             Log.i("Screen", "Go to list view");
+            api.saveUserRole();
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             fm.popBackStack();

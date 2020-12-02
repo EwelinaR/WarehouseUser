@@ -1,6 +1,7 @@
 package com.example.warehouseuser.api;
 
 import android.content.Context;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.example.warehouseuser.AuthenticationInterceptor;
@@ -8,13 +9,16 @@ import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.SessionManager;
 import com.example.warehouseuser.UpdateInstrument;
+import com.example.warehouseuser.UserInfo;
 import com.example.warehouseuser.fragment.update.FragmentUpdate;
 import com.example.warehouseuser.fragment.update.FragmentUpdateList;
 import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Credentials;
@@ -81,6 +85,13 @@ public class RestApi implements FragmentUpdate {
         call.enqueue(new SignInCallback(manager, update));
     }
 
+    public void saveUserRole() {
+        RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
+
+        Call<UserInfo> call = retrofitApi.getUserInfo(manager.getAccessToken());
+        call.enqueue(new UserInfoCallback(manager));
+    }
+
     public void getInstruments(FragmentUpdateList fragmentView) {
         RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
@@ -100,7 +111,8 @@ public class RestApi implements FragmentUpdate {
                     call = retrofitApi.addInstrument(updateInstrument.getInstrument());
                     break;
                 case "PUT":
-                    call = retrofitApi.updateInstrument(updateInstrument.getInstrument(), updateInstrument.getDate());
+                    call = retrofitApi.updateInstrument(updateInstrument.getInstrument().getId(),
+                            updateInstrument.getInstrument(), updateInstrument.getDate());
                     break;
                 case "DELETE":
                     call = retrofitApi.deleteInstrument(updateInstrument.getInstrument().getId());
@@ -117,14 +129,43 @@ public class RestApi implements FragmentUpdate {
         }
     }
 
-    private String updateMessage = "";
+    private ArrayMap<String, String> map = new ArrayMap<>();
+
     @Override
     public void updateView(RequestResponseStatus status, String message) {
-        updateMessage += message+"\n";
+        System.out.println(message);
+        if (status == RequestResponseStatus.OK) {
+            Map<String, String> mm = new HashMap<>();
+            mm.put("0", "producent");
+            mm.put("1", "model");
+            mm.put("2", "cena");
+
+            if (!message.isEmpty()) {
+                String[] fields = message.split(";");
+                String objectId = fields[0];
+                // for all modified fields in object
+                for (String field : fields) {
+                    String[] values = field.split(":");
+                    if (values.length != 3) continue;
+                    map.put(objectId + ";" + values[0],
+                            "Pole " + mm.get(values[0]) + " zostało nadpisane:\n'"
+                                    + values[1] + "' -> '" + values[2] + "'");
+                }
+            }
+        } else if (status == RequestResponseStatus.NOT_FOUND) {
+         //   String[] fields = message.split(";");
+          //  map.put(String.valueOf(id), "Nie można zmienić: '" + field2 + "' Instrument został usunięty.");
+        }
+
+        System.out.println(map.toString());
         updateAmount--;
         if (updateAmount == 0) {
-            observer.updateView(status, updateMessage);
-            updateMessage = "";
+            String m = "\tKonflikty!";
+            for (String a: map.values()) {
+                m += "\n\n"+a;
+            }
+            observer.updateView(status, m);
+            map.clear();
         }
     }
 }

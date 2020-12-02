@@ -104,8 +104,11 @@ public class InternalStorage {
             }});
 
         writeInstruments(instruments);
-        String requestType = amount > 0 ? "INCREASE" : "DECREASE";
-        writeUpdate(new UpdateInstrument(requestType, instrument, amount));
+        if (amount > 0) {
+            writeUpdate(new UpdateInstrument("INCREASE", instrument, amount));
+        } else {
+            writeUpdate(new UpdateInstrument("DECREASE", instrument, -amount));
+        }
     }
 
     public void writeInstruments(List<Instrument> instruments) throws IOException {

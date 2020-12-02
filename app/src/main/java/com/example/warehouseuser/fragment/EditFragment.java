@@ -11,6 +11,7 @@ import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.MainActivity;
 import com.example.warehouseuser.Instrument;
 import com.example.warehouseuser.R;
+import com.example.warehouseuser.SessionManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
@@ -45,8 +46,14 @@ public class EditFragment extends DetailedFragment {
         save.setOnClickListener(this::save);
         save.setText("Zapisz");
 
+        SessionManager manager = new SessionManager(requireContext());
         Button delete = getActivity().findViewById(R.id.delete);
-        delete.setOnClickListener(view -> delete());
+
+        if (manager.isManager()) {
+            delete.setOnClickListener(view -> delete());
+        } else {
+            delete.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void initQuantityFields() {

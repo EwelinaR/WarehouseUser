@@ -18,8 +18,8 @@ import retrofit2.Response;
 
 public class SignInCallback implements Callback<TokenResponse> {
 
-    private OnAuthenticationUpdate update;
-    private SessionManager manager;
+    private final OnAuthenticationUpdate update;
+    private final SessionManager manager;
 
     public SignInCallback(SessionManager manager, OnAuthenticationUpdate update) {
         this.update = update;

@@ -30,6 +30,7 @@ public class SimpleCallback implements Callback<ResponseBody> {
 
         String message = "";
         try {
+            if (response.body() != null)
             message = response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
@@ -42,6 +43,8 @@ public class SimpleCallback implements Callback<ResponseBody> {
             fragment.updateView(RequestResponseStatus.UNAUTHORIZED, message);
         } else if (response.code() == 403) {
             fragment.updateView(RequestResponseStatus.FORBIDDEN, message);
+        } else if (response.code() == 404) {
+            fragment.updateView(RequestResponseStatus.NOT_FOUND, message);
         } else {
             try {
                 JSONObject jObjError = new JSONObject(response.errorBody().string());

@@ -8,6 +8,7 @@ public class SessionManager {
     private SharedPreferences sharedPreferences;
     private final String ACCESS_TOKEN = "access_token";
     private final String REFRESH_TOKEN = "refresh_token";
+    private final String ROLE = "role";
 
     public SessionManager(Context context) {
         sharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE);
@@ -33,10 +34,21 @@ public class SessionManager {
         editor.apply();
     }
 
+    public boolean isManager() {
+        return sharedPreferences.getString(ROLE, null).equals("1");
+    }
+
+    public void setManager(boolean isManager) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(ROLE, isManager ? "1" : "0");
+        editor.apply();
+    }
+
     public void removeData() {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(ACCESS_TOKEN);
         editor.remove(REFRESH_TOKEN);
+        editor.remove(ROLE);
         editor.apply();
     }
 }
