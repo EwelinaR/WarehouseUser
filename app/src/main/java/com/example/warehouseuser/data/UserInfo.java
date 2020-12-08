@@ -1,4 +1,4 @@
-package com.example.warehouseuser;
+package com.example.warehouseuser.data;
 
 import java.util.List;
 

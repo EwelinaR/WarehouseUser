@@ -2,7 +2,7 @@ package com.example.warehouseuser.api;
 
 import android.util.Log;
 
-import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.data.Instrument;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.fragment.update.FragmentUpdateList;
 
@@ -19,7 +19,7 @@ import retrofit2.Response;
 
 public class ListCallback implements Callback<List<Instrument>> {
 
-    private FragmentUpdateList fragmentView;
+    private final FragmentUpdateList fragmentView;
 
     public ListCallback(FragmentUpdateList fragmentView) {
         this.fragmentView = fragmentView;

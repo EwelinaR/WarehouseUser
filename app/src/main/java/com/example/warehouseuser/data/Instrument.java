@@ -1,13 +1,13 @@
-package com.example.warehouseuser;
+package com.example.warehouseuser.data;
 
 import java.io.Serializable;
 
 public class Instrument implements Serializable {
-    private int id;
-    private String manufacturer;
-    private String model;
-    private float price;
-    private int quantity;
+    protected int id;
+    protected String manufacturer;
+    protected String model;
+    protected float price;
+    protected int quantity;
 
     public Instrument(int id, String manufacturer, String model, float price, int quantity) {
         this.id = id;
@@ -15,6 +15,10 @@ public class Instrument implements Serializable {
         this.model = model;
         this.price = price;
         this.quantity = quantity;
+    }
+
+    public DetailedInstrument getDetailedInstrument() {
+        return new DetailedInstrument(this);
     }
 
     public int getId() {

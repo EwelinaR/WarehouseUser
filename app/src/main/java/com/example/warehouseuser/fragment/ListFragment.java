@@ -1,5 +1,6 @@
 package com.example.warehouseuser.fragment;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +17,7 @@ import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.MainActivity;
 import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.api.RestApi;
-import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.data.Instrument;
 import com.example.warehouseuser.InstrumentAdapter;
 import com.example.warehouseuser.R;
 import com.example.warehouseuser.fragment.update.FragmentUpdateList;
@@ -30,6 +31,7 @@ import java.util.List;
 public class ListFragment extends Fragment implements FragmentUpdateList, OnAuthenticationUpdate {
 
     private RestApi api;
+    private Activity activity;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -38,12 +40,12 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        ((MainActivity)getActivity()).displayButtonsAfterSignIn();
-        api = new RestApi(this.getContext());
-
+        activity = this.getActivity();
+        ((MainActivity) activity).displayButtonsAfterSignIn();
+        api = new RestApi(activity);
         getInstruments();
 
-        FloatingActionButton fab = getActivity().findViewById(R.id.add);
+        FloatingActionButton fab = activity.findViewById(R.id.add);
         fab.setOnClickListener(view1 -> {
             Log.i("Screen", "Go to add view");
             FragmentManager fm = getFragmentManager();
@@ -54,8 +56,8 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
     }
 
     private void getInstruments() {
-        InternalStorage storage = new InternalStorage(requireContext());
-        List<Instrument> instruments = storage.readInstruments();
+        InternalStorage storage = new InternalStorage(activity);
+        List<Instrument> instruments = storage.readInstrumentsForDisplay();
         if (instruments == null) {
             api.getInstruments(this);
         } else {
@@ -67,7 +69,7 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
     @Override
     public void updateView(RequestResponseStatus status, List<Instrument> instruments) {
         if (status == RequestResponseStatus.TIMEOUT) {
-            Snackbar mySnackbar = Snackbar.make(getActivity().findViewById(R.id.list_view),
+            Snackbar mySnackbar = Snackbar.make(activity.findViewById(R.id.list_view),
                     getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
             mySnackbar.setAction(getString(R.string.retry_connection), view12 -> api.getInstruments(this));
             mySnackbar.show();
@@ -78,13 +80,13 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
             return;
         }
 
-        displayInstruments(instruments);
         saveInstruments(instruments);
+        displayInstruments(instruments);
     }
 
     private void displayInstruments(List<Instrument> instruments) {
-        InstrumentAdapter adapter = new InstrumentAdapter(getActivity(), instruments);
-        ListView listView = getActivity().findViewById(R.id.list_view);
+        InstrumentAdapter adapter = new InstrumentAdapter(activity, instruments);
+        ListView listView = activity.findViewById(R.id.list_view);
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -99,9 +101,9 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
     }
 
     private void saveInstruments(List<Instrument> instruments) {
-        InternalStorage storage = new InternalStorage(requireContext());
+        InternalStorage storage = new InternalStorage(activity);
         try {
-            storage.writeInstruments(instruments);
+            storage.saveInstrumentsFromServer(instruments);
             Log.i("Storage", "Saved data to local storage");
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,6 +112,8 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
 
     @Override
     public void onAuthentication(RequestResponseStatus status) {
-        api.getInstruments(this);
+        if (status == RequestResponseStatus.OK) {
+            api.getInstruments(this);
+        }
     }
 }

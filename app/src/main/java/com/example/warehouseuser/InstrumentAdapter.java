@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.warehouseuser.data.Instrument;
+
 import java.util.List;
 
 public class InstrumentAdapter extends ArrayAdapter<Instrument> {

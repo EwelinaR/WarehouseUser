@@ -3,7 +3,7 @@ package com.example.warehouseuser.api;
 import android.util.Log;
 
 import com.example.warehouseuser.SessionManager;
-import com.example.warehouseuser.UserInfo;
+import com.example.warehouseuser.data.UserInfo;
 
 import java.net.SocketTimeoutException;
 

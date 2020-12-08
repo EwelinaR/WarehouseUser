@@ -9,7 +9,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.MainActivity;
-import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.data.DetailedInstrument;
+import com.example.warehouseuser.data.Instrument;
 import com.example.warehouseuser.R;
 import com.example.warehouseuser.SessionManager;
 import com.google.android.material.snackbar.Snackbar;
@@ -22,7 +23,7 @@ public class EditFragment extends DetailedFragment {
     private boolean isDataChanged;
 
     public EditFragment(Instrument instrument) {
-        this.instrument = instrument;
+        this.instrument = instrument.getDetailedInstrument();
     }
 
     @Override
@@ -95,7 +96,7 @@ public class EditFragment extends DetailedFragment {
     }
 
     private void saveUpdateToInternalStorage() {
-        Instrument instrument = getDataChanges();
+        saveDataChanges();
         InternalStorage storage = new InternalStorage((MainActivity)getContext());
         if (isDataChanged) {
             try {
@@ -107,26 +108,22 @@ public class EditFragment extends DetailedFragment {
         int amount = Integer.parseInt(quantityDifference.getText().toString());
         if (amount != 0) {
             try {
-                storage.changeAmountOfInstrument(instrument, amount);
+                storage.updateQuantity(instrument.getId(), amount);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private Instrument getDataChanges() {
-        String changedManufacturer = null;
-        String changedModel = null;
-        float changedPrice = -1;
+    private void saveDataChanges() {
+        float changedPrice;
         isDataChanged = false;
         if (!instrument.getManufacturer().equals(manufacturer.getText().toString())) {
-            changedManufacturer = manufacturer.getText().toString();
-            instrument.setManufacturer(changedManufacturer);
+            instrument.setManufacturer(manufacturer.getText().toString());
             isDataChanged = true;
         }
         if (!instrument.getModel().equals(model.getText().toString())) {
-            changedModel = model.getText().toString();
-            instrument.setModel(changedModel);
+            instrument.setModel(model.getText().toString());
             isDataChanged = true;
         }
         if (instrument.getPrice() != Float.parseFloat(price.getText().toString())) {
@@ -138,13 +135,12 @@ public class EditFragment extends DetailedFragment {
             instrument.setPrice(changedPrice);
             isDataChanged = true;
         }
-        return new Instrument(instrument.getId(), changedManufacturer, changedModel, changedPrice, -1);
     }
 
     private void delete() {
         InternalStorage storage = new InternalStorage((MainActivity)getContext());
         try {
-            storage.deleteInstrument(instrument);
+            storage.deleteInstrument(instrument.getId());
         } catch (IOException e) {
             e.printStackTrace();
         }

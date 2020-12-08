@@ -9,7 +9,7 @@ import android.widget.Button;
 
 import androidx.fragment.app.FragmentManager;
 
-import com.example.warehouseuser.Instrument;
+import com.example.warehouseuser.data.Instrument;
 import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.R;
 import com.google.android.material.snackbar.Snackbar;

@@ -29,8 +29,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity implements FragmentUpdate, OnAuthenticationUpdate {
 
     private TextView signOut;
@@ -77,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
 
         signOut = view.findViewById(R.id.sign_out_button);
         signOut.setVisibility(View.INVISIBLE);
-        signOut.setOnClickListener(this::onOptionsItemSelected);
+        signOut.setOnClickListener(this::signOut);
     }
 
     public void displayButtonsAfterSignIn() {
@@ -85,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
         signOut.setVisibility(View.VISIBLE);
     }
 
-    public void onOptionsItemSelected(View view) {
+    public void signOut(View view) {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
@@ -107,35 +105,25 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
     }
 
     public void sync(View view) {
-        InternalStorage storage = new InternalStorage(this);
-        List<UpdateInstrument> updateInstruments = storage.readUpdates();
-        if (updateInstruments.size() > 0) {
-            api.sendUpdates(updateInstruments, this);
-        } else {
-            storage.deleteData();
-            goToListFragment();
-        }
+        Updater updater = new Updater(this, this);
     }
 
     @Override
     public void updateView(RequestResponseStatus status, String message) {
-        // TODO should the status be checked here?
-        if (status == RequestResponseStatus.TIMEOUT) {
+        if (status == null || status == RequestResponseStatus.OK) {
+            goToListFragment();
+            if (!message.isEmpty()) showPopup(message);
+        }
+        else if (status == RequestResponseStatus.TIMEOUT) {
             Snackbar mySnackbar = Snackbar.make(findViewById(R.id.list_view),
                     getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
             mySnackbar.setAction(getString(R.string.retry_connection), view12 -> sync(null));
             mySnackbar.show();
-            return;
-        }
-        else if (status == RequestResponseStatus.UNAUTHORIZED) {
+        } else if (status == RequestResponseStatus.UNAUTHORIZED) {
             api.refreshToken(this);
-            return;
         }
-        InternalStorage storage = new InternalStorage(this);
-        storage.deleteData();
 
-        goToListFragment();
-        showPopup(message);
+
     }
 
     private void goToListFragment() {
@@ -162,6 +150,25 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
 
     @Override
     public void onAuthentication(RequestResponseStatus status) {
-        sync(null);
+        if (status == RequestResponseStatus.OK) {
+            sync(null);
+        } else if (status == RequestResponseStatus.BAD_CREDENTIALS) {
+            signOut((View) null);
+        }
+    }
+
+    public void onFinishedUpdate(RequestResponseStatus status) {
+        if (status == null)
+            goToListFragment();
+        if (status == RequestResponseStatus.OK)
+            goToListFragment();
+        else if (status == RequestResponseStatus.NOT_FOUND) {
+            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.list_view),
+                    getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
+            mySnackbar.setAction(getString(R.string.retry_connection), view12 -> sync(null));
+            mySnackbar.show();
+        } else if (status == RequestResponseStatus.UNAUTHORIZED) {
+            api.refreshToken(this);
+        }
     }
 }
