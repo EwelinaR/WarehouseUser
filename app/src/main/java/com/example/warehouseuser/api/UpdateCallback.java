@@ -29,13 +29,16 @@ public class UpdateCallback implements Callback<ResponseBody> {
 
         String message = "";
         try {
-            if (response.body() != null)
+            if (response.body() != null) {
                 message = response.body().string();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if(response.isSuccessful()) {
+        if (response.code() == 208) {
+            updater.update(RequestResponseStatus.CONFLICT, message, isQuantityChange);
+        } else if(response.isSuccessful()) {
             Log.i("API", "Request successful");
             updater.update(RequestResponseStatus.OK, message, isQuantityChange);
         } else if (response.code() == 401) {

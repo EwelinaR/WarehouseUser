@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
     public void updateView(RequestResponseStatus status, String message) {
         if (status == null || status == RequestResponseStatus.OK) {
             goToListFragment();
-            if (!message.isEmpty()) showPopup(message);
+            if (!message.isEmpty()) showPopup("Konflikty:\n\n" + message);
         }
         else if (status == RequestResponseStatus.TIMEOUT) {
             Snackbar mySnackbar = Snackbar.make(findViewById(R.id.list_view),
@@ -122,8 +122,6 @@ public class MainActivity extends AppCompatActivity implements FragmentUpdate, O
         } else if (status == RequestResponseStatus.UNAUTHORIZED) {
             api.refreshToken(this);
         }
-
-
     }
 
     private void goToListFragment() {

@@ -70,8 +70,8 @@ public class Updater {
     }
 
     public void update(RequestResponseStatus status, String message, boolean isQuantityChanged) {
-        if (status == RequestResponseStatus.OK) {
-            resolveConflicts(message);
+        if (status == RequestResponseStatus.OK || status == RequestResponseStatus.CONFLICT) {
+            if (status == RequestResponseStatus.CONFLICT) resolveConflicts(message);
             if (isQuantityChanged) instruments.get(currentId).removeLastQuantityChange();
             else if (requestType.equals("POST")) {
                 instruments.get(currentId).setAsNew(false);
@@ -93,31 +93,52 @@ public class Updater {
         }
     }
 
-    private void resolveConflicts(String response) {
-        //TODO
+    private void resolveConflicts(String conflictMessage) {
+        if (requestType.equals("PUT")) {
+            message += "Poniższe wartości zostały nadpisane: ";
+            String[] splitedMessage = conflictMessage.split(";");
+            if (!splitedMessage[0].isEmpty()) {
+                message += "\"" + instruments.get(currentId).getManufacturer() + "\" ";
+                instruments.get(currentId).setManufacturer(splitedMessage[0]);
+            }
+            if (splitedMessage.length > 1 && !splitedMessage[1].isEmpty()) {
+                message += "\"" + instruments.get(currentId).getModel() + "\" ";
+                instruments.get(currentId).setModel(splitedMessage[1]);
+            }
+            if (splitedMessage.length > 2 && !splitedMessage[2].isEmpty()) {
+                message += "\"" + instruments.get(currentId).getPrice() + "\" ";
+                instruments.get(currentId).setPrice(Float.parseFloat(splitedMessage[2]));
+            }
+            message += "\n\n";
+        } else {
+            String sign = instruments.get(currentId).getChangedQuantity() >= 0 ? "+" : "";
+            System.out.println("SIGNN  "+sign);
+            message += "Nie udało się zmienić liczby instrumentu "
+                    + sign
+                    + instruments.get(currentId).getChangedQuantity()
+                    + " dla \""
+                    + instruments.get(currentId).getModel()
+                    + "\".\n\n";
+        }
     }
 
     private void updateNotFoundMessage() {
         if (instruments.get(currentId).isDeleted()) {
-            message += "Instrument " + instruments.get(currentId).getModel() + " został już usunięty.";
+            message += "Instrument " + instruments.get(currentId).getModel() + " został już usunięty.\n\n";
             instruments.remove(currentId);
         }
         else if (instruments.get(currentId).isQuantityChanged()) {
-            message += "Nie można zmienić liczby modelu " + instruments.get(currentId).getModel() + "!" +
-                    "Została ona zmieniona: " + message;
+            message += "Nie udało się zmienić liczby instrumentu "
+                    + (instruments.get(currentId).getChangedQuantity() >= 0 ? "+" : "")
+                    + instruments.get(currentId).getChangedQuantity()
+                    + " dla \""
+                    + instruments.get(currentId).getModel()
+                    + "\" - instrument został usumięty.\n\n";
         }
         else if (instruments.get(currentId).existFieldUpdate()) {
-            message += "Zmiany zostały nadpisane: ";
-            String changedFields = "";
-            if (instruments.get(currentId).getManufacturerTimestamp() > 0)
-                changedFields += ", " + instruments.get(currentId).getManufacturer();
-            if (instruments.get(currentId).getModelTimestamp() > 0)
-                changedFields += ", " + instruments.get(currentId).getModel();
-            if (instruments.get(currentId).getPriceTimestamp() > 0)
-                changedFields += ", " + instruments.get(currentId).getPrice();
-
-            if (!changedFields.isEmpty())
-                message += changedFields.substring(2);
+            message += "Nie udało się zmienić pól dla \""
+                    + instruments.get(currentId).getModel()
+                    + "\" - instrument został usumięty.\n\n";
         }
     }
 }
