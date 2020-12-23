@@ -6,6 +6,8 @@ import java.util.List;
 
 public class DetailedInstrument extends Instrument {
 
+    private static final long serialVersionUID = 7245612247752958479L;
+
     private Long manufacturerTimestamp = 0L;
     private Long modelTimestamp = 0L;
     private Long priceTimestamp = 0L;
@@ -13,10 +15,31 @@ public class DetailedInstrument extends Instrument {
 
     private boolean isDeleted = false;
     private boolean isNew = false;
-    private final List<Integer> changedQuantity = new ArrayList<>();
+    private List<Integer> changedQuantity;
 
     public DetailedInstrument(Instrument instrument) {
         super(instrument.getId(), instrument.getManufacturer(), instrument.getModel(), instrument.getPrice(), instrument.getQuantity());
+        changedQuantity = new ArrayList<>();
+    }
+
+    public DetailedInstrument(int id, String manufacturer, String model, float price, int quantity) {
+        super(id, manufacturer, model, price, quantity);
+        changedQuantity = new ArrayList<>();
+    }
+
+    public InstrumentWrapper createInstrumentWrapper() {
+        InstrumentWrapper i = new InstrumentWrapper(id, manufacturer, model, price, quantity, 0);
+        i.setAsNew(isNew);
+        if(isDeleted) i.setAsDeleted();
+        i.setChangeQuantity(changedQuantity);
+        i.setTimestamps(manufacturerTimestamp, modelTimestamp, priceTimestamp);
+        return i;
+    }
+
+    public void setTimestamps(Long manufacturerTimestamp, Long modelTimestamp, Long priceTimestamp) {
+        this.manufacturerTimestamp = manufacturerTimestamp;
+        this.modelTimestamp = modelTimestamp;
+        this.priceTimestamp = priceTimestamp;
     }
 
     public Long getManufacturerTimestamp() {
@@ -51,13 +74,13 @@ public class DetailedInstrument extends Instrument {
     }
 
     public void changeQuantity(int quantityDifference) {
+        if (changedQuantity == null) changedQuantity = new ArrayList<>();
         this.changedQuantity.add(quantityDifference);
         this.quantity += quantityDifference;
-        this.quantityTimestamp = new Date().getTime();
     }
 
     public boolean isQuantityChanged() {
-        return !changedQuantity.isEmpty();
+        return changedQuantity != null && !changedQuantity.isEmpty();
     }
 
     public List<Integer> getChangedQuantities() {
@@ -65,12 +88,17 @@ public class DetailedInstrument extends Instrument {
     }
 
     public int getChangedQuantity() {
-        if (changedQuantity.isEmpty()) return 0;
+        if (changedQuantity == null ||changedQuantity.isEmpty()) return 0;
         return changedQuantity.get(0);
     }
 
+    public void setChangeQuantity(List<Integer> changedQuantity) {
+        this.changedQuantity = changedQuantity;
+    }
+
     public void removeLastQuantityChange() {
-        changedQuantity.remove(0);
+        quantityTimestamp = 0L;
+        if (changedQuantity != null) changedQuantity.remove(0);
     }
 
     public boolean existFieldUpdate() {

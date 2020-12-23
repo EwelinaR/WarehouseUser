@@ -1,10 +1,10 @@
 package com.example.warehouseuser;
 
 import android.content.Context;
+import android.content.res.Resources;
 
 import com.example.warehouseuser.api.RestApi;
-import com.example.warehouseuser.data.DetailedInstrument;
-import com.example.warehouseuser.data.Instrument;
+import com.example.warehouseuser.data.InstrumentWrapper;
 import com.example.warehouseuser.fragment.update.FragmentUpdate;
 
 import java.io.IOException;
@@ -12,8 +12,9 @@ import java.util.List;
 
 public class Updater {
 
-    private final List<DetailedInstrument> instruments;
+    private final List<InstrumentWrapper> instruments;
     private final RestApi api;
+    private final Resources resources;
     private String message = "";
     private final FragmentUpdate main;
     private int currentId = 0;
@@ -23,9 +24,9 @@ public class Updater {
     public Updater(Context context, FragmentUpdate main) {
         this.main = main;
         storage = new InternalStorage(context);
-        List<Instrument> oldStatesOfInstruments = storage.readInstrumentsFromServer();
         instruments = storage.readUpdatedInstruments();
         api = new RestApi(context);
+        resources = context.getResources();
 
         if (instruments == null || instruments.isEmpty()) finishUpdate(null);
         else computeNextUpdate();
@@ -108,6 +109,11 @@ public class Updater {
             if (splitedMessage.length > 2 && !splitedMessage[2].isEmpty()) {
                 message += "\"" + instruments.get(currentId).getPrice() + "\" ";
                 instruments.get(currentId).setPrice(Float.parseFloat(splitedMessage[2]));
+            }
+            if (splitedMessage.length > 3 && !splitedMessage[3].isEmpty()) {
+                String[] categoryList = resources.getStringArray(R.array.category_list);
+                message += "\"" + categoryList[instruments.get(currentId).getCategory()] + "\" ";
+                instruments.get(currentId).setCategory(Integer.parseInt(splitedMessage[3]));
             }
             message += "\n\n";
         } else {

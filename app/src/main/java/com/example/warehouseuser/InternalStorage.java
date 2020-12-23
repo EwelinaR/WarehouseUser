@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.warehouseuser.data.DetailedInstrument;
 import com.example.warehouseuser.data.Instrument;
+import com.example.warehouseuser.data.InstrumentWrapper;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,7 +28,7 @@ public class InternalStorage {
         this.context = context;
     }
 
-    public void saveInstrumentsFromServer(List<Instrument> instruments) throws IOException {
+    public void saveInstrumentsFromServer(List<InstrumentWrapper> instruments) throws IOException {
         // save to base version
         FileOutputStream fos = context.openFileOutput(INSTRUMENTS, Context.MODE_PRIVATE);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -40,8 +41,9 @@ public class InternalStorage {
         // save to update version
         fos = context.openFileOutput(UPDATED_INSTRUMENTS, Context.MODE_PRIVATE);
         oos = new ObjectOutputStream(fos);
-        for (Instrument instrument: instruments) {
-            oos.writeObject(instrument.getDetailedInstrument());
+        for (InstrumentWrapper instrument: instruments) {
+            instrument.markAsCurrentVersion();
+            oos.writeObject(instrument);
         }
         oos.close();
         fos.close();
@@ -65,34 +67,34 @@ public class InternalStorage {
     }
 
     public void deleteInstrument(int id) throws IOException {
-        List<DetailedInstrument> instruments = readUpdatedInstruments().stream()
+        List<InstrumentWrapper> instruments = readUpdatedInstruments().stream()
                 .peek(i -> { if (i.getId() == id) i.setAsDeleted(); })
                 .filter(i -> i.getId() != id || !i.isNew())
                 .collect(Collectors.toList());
         saveUpdate(instruments);
     }
 
-    public void updateInstrument(Instrument instrument) throws IOException {
-        List<DetailedInstrument> instruments = readUpdatedInstruments();
+    public void updateInstrument(InstrumentWrapper instrument) throws IOException {
+        List<InstrumentWrapper> instruments = readUpdatedInstruments();
         instruments.forEach(i -> {
             if (i.getId() == instrument.getId()) {
-                String newManufacturer = instrument.getManufacturer();
-                if (!newManufacturer.equals(i.getManufacturer())) i.setManufacturer(instrument.getManufacturer());
+                if (!instrument.getManufacturer().equals(i.getManufacturer())) i.setManufacturer(instrument.getManufacturer());
                 if (!instrument.getModel().equals(i.getModel())) i.setModel(instrument.getModel());
+                if (instrument.getCategory() != i.getCategory()) i.setCategory(instrument.getCategory());
                 if (instrument.getPrice() != i.getPrice()) i.setPrice(instrument.getPrice());
             }});
         saveUpdate(instruments);
     }
 
     public void updateQuantity(int id, int amount) throws IOException {
-        List<DetailedInstrument> instruments = readUpdatedInstruments();
+        List<InstrumentWrapper> instruments = readUpdatedInstruments();
         instruments.forEach(i -> { if (i.getId() == id) i.changeQuantity(amount); });
 
         saveUpdate(instruments);
     }
 
-    public void addInstrument(Instrument instrument) throws IOException {
-        List<DetailedInstrument> instruments = readUpdatedInstruments();
+    public void addInstrument(InstrumentWrapper instrument) throws IOException {
+        List<InstrumentWrapper> instruments = readUpdatedInstruments();
         int id;
         try {
             id = Collections.max(
@@ -102,55 +104,39 @@ public class InternalStorage {
         }
 
         instrument.setId(id);
-        DetailedInstrument i = instrument.getDetailedInstrument();
-        i.setAsNew(true);
-        instruments.add(i);
+        instrument.setAsNew(true);
+        instruments.add(instrument);
         saveUpdate(instruments);
     }
 
-    public void saveUpdate(List<DetailedInstrument> instruments) throws IOException {
+    public void saveUpdate(List<InstrumentWrapper> instruments) throws IOException {
         FileOutputStream fos = context.openFileOutput(UPDATED_INSTRUMENTS, Context.MODE_PRIVATE);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
-        for (DetailedInstrument instrument: instruments) {
+        for (InstrumentWrapper instrument: instruments) {
             oos.writeObject(instrument);
         }
         oos.close();
         fos.close();
     }
 
-    public List<DetailedInstrument> readUpdatedInstruments() {
+    public List<InstrumentWrapper> readUpdatedInstruments() {
         try {
-            List<DetailedInstrument> instruments = new ArrayList<>();
+            List<InstrumentWrapper> instruments = new ArrayList<>();
             FileInputStream fis = context.openFileInput(UPDATED_INSTRUMENTS);
             ObjectInputStream ois = new ObjectInputStream(fis);
 
             while (fis.available() > 0) {
-                instruments.add((DetailedInstrument) ois.readObject());
+                Object o = ois.readObject();
+                if (o instanceof InstrumentWrapper) {
+                    instruments.add((InstrumentWrapper) o);
+                } else if (o instanceof  DetailedInstrument) {
+                    DetailedInstrument i = (DetailedInstrument) o;
+                    instruments.add(i.createInstrumentWrapper());
+                }
             }
             ois.close();
             fis.close();
             return instruments;
-        } catch (IOException | ClassNotFoundException e) {
-            return null;
-        }
-    }
-
-    public List<Instrument> readInstrumentsForDisplay() {
-        try {
-            List<DetailedInstrument> instruments = new ArrayList<>();
-            FileInputStream fis = context.openFileInput(UPDATED_INSTRUMENTS);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-
-            while (fis.available() > 0) {
-                instruments.add((DetailedInstrument) ois.readObject());
-            }
-            ois.close();
-            fis.close();
-            List<Instrument> ins = new ArrayList<>();
-            for (DetailedInstrument instrument: instruments) {
-                if (!instrument.isDeleted()) ins.add(instrument);
-            }
-            return ins;
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             return null;

@@ -1,7 +1,6 @@
 package com.example.warehouseuser.api;
 
-import com.example.warehouseuser.data.DetailedInstrument;
-import com.example.warehouseuser.data.Instrument;
+import com.example.warehouseuser.data.InstrumentWrapper;
 import com.example.warehouseuser.data.UserInfo;
 
 import java.util.List;
@@ -20,13 +19,13 @@ import retrofit2.http.Query;
 
 public interface RetrofitApi {
     @GET("instruments")
-    Call<List<Instrument>> getInstruments();
+    Call<List<InstrumentWrapper>> getInstruments();
 
     @POST("instruments")
-    Call<ResponseBody> addInstrument(@Body Instrument instrument);
+    Call<ResponseBody> addInstrument(@Body InstrumentWrapper instrument);
 
     @PUT("instruments/v2/{id}")
-    Call<ResponseBody> updateInstrument(@Path("id") long id, @Body DetailedInstrument instrument);
+    Call<ResponseBody> updateInstrument(@Path("id") long id, @Body InstrumentWrapper instrument);
 
     @PUT("instruments/increase/{id}/{amount}")
     Call<ResponseBody> increaseQuantity(@Path("id") int id, @Path("amount") int amount);

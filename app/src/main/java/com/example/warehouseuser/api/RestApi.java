@@ -1,25 +1,19 @@
 package com.example.warehouseuser.api;
 
 import android.content.Context;
-import android.util.ArrayMap;
 import android.util.Log;
 
 import com.example.warehouseuser.AuthenticationInterceptor;
 import com.example.warehouseuser.Updater;
-import com.example.warehouseuser.data.DetailedInstrument;
-import com.example.warehouseuser.data.Instrument;
-import com.example.warehouseuser.RequestResponseStatus;
 import com.example.warehouseuser.SessionManager;
+import com.example.warehouseuser.data.InstrumentWrapper;
 import com.example.warehouseuser.data.UserInfo;
-import com.example.warehouseuser.fragment.update.FragmentUpdate;
 import com.example.warehouseuser.fragment.update.FragmentUpdateList;
 import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Credentials;
@@ -92,18 +86,18 @@ public class RestApi {
     public void getInstruments(FragmentUpdateList fragmentView) {
         RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
-        Call<List<Instrument>> call = retrofitApi.getInstruments();
+        Call<List<InstrumentWrapper>> call = retrofitApi.getInstruments();
         call.enqueue(new ListCallback(fragmentView));
     }
 
-    public void sendNewInstrument(Instrument instrument, Updater updater) {
+    public void sendNewInstrument(InstrumentWrapper instrument, Updater updater) {
         RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
         Call<ResponseBody> call = retrofitApi.addInstrument(instrument);
         call.enqueue(new UpdateCallback(updater, false));
     }
 
-    public void updateInstrument(DetailedInstrument instrument, Updater updater) {
+    public void updateInstrument(InstrumentWrapper instrument, Updater updater) {
         RetrofitApi retrofitApi = createRetrofitApi(BEARER_PREFIX + manager.getAccessToken());
 
         Call<ResponseBody> call = retrofitApi.updateInstrument(instrument.getId(), instrument);

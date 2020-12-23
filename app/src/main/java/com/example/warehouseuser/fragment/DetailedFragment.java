@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -19,6 +20,8 @@ public class DetailedFragment extends Fragment {
     protected EditText price;
     protected TextView quantity;
     protected TextView quantityDifference;
+    protected Spinner category;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -28,6 +31,7 @@ public class DetailedFragment extends Fragment {
     protected void initEditTexts() {
         manufacturer = getActivity().findViewById(R.id.manufacturer_edit);
         model = getActivity().findViewById(R.id.model_edit);
+        category = getActivity().findViewById(R.id.category_edit);
         price = getActivity().findViewById(R.id.price_edit);
         quantity = getActivity().findViewById(R.id.quantity_amount);
         quantityDifference = getActivity().findViewById(R.id.quantity_edit);

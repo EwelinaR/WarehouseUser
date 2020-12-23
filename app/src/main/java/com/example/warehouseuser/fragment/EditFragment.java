@@ -9,21 +9,20 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.MainActivity;
-import com.example.warehouseuser.data.DetailedInstrument;
-import com.example.warehouseuser.data.Instrument;
 import com.example.warehouseuser.R;
 import com.example.warehouseuser.SessionManager;
+import com.example.warehouseuser.data.InstrumentWrapper;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 
 public class EditFragment extends DetailedFragment {
 
-    private final Instrument instrument;
+    private final InstrumentWrapper instrument;
     private boolean isDataChanged;
 
-    public EditFragment(Instrument instrument) {
-        this.instrument = instrument.getDetailedInstrument();
+    public EditFragment(InstrumentWrapper instrument) {
+        this.instrument = instrument;
     }
 
     @Override
@@ -80,6 +79,7 @@ public class EditFragment extends DetailedFragment {
         manufacturer.setSelection(manufacturer.getText().length());
         model.setText(instrument.getModel());
         model.setSelection(model.getText().length());
+        category.setSelection(instrument.getCategory());
         price.setText(String.format("%.2f", instrument.getPrice()));
         price.setSelection(price.getText().length());
         quantity.setText(String.valueOf(instrument.getQuantity()));
@@ -124,6 +124,10 @@ public class EditFragment extends DetailedFragment {
         }
         if (!instrument.getModel().equals(model.getText().toString())) {
             instrument.setModel(model.getText().toString());
+            isDataChanged = true;
+        }
+        if (instrument.getCategory() != category.getSelectedItemPosition()) {
+            instrument.setCategory(category.getSelectedItemPosition());
             isDataChanged = true;
         }
         if (instrument.getPrice() != Float.parseFloat(price.getText().toString())) {

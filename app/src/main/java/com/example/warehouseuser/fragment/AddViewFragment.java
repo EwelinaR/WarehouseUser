@@ -9,9 +9,9 @@ import android.widget.Button;
 
 import androidx.fragment.app.FragmentManager;
 
-import com.example.warehouseuser.data.Instrument;
 import com.example.warehouseuser.InternalStorage;
 import com.example.warehouseuser.R;
+import com.example.warehouseuser.data.InstrumentWrapper;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
@@ -63,12 +63,13 @@ public class AddViewFragment extends DetailedFragment {
             return;
         }
         Log.i("Screen", "Go to list view from add view");
-        Instrument newInstrument = new Instrument(
+        InstrumentWrapper newInstrument = new InstrumentWrapper(
                 0,
                 manufacturer.getText().toString(),
                 model.getText().toString(),
                 Float.parseFloat(price.getText().toString()),
-                0);
+                0,
+                category.getSelectedItemPosition());
 
         InternalStorage storage = new InternalStorage(requireContext());
         try {

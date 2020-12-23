@@ -9,4 +9,11 @@
     <string name="connection_forbidden">Brak uprawnień do wykonania czynności.</string>
     <string name="bad_credentials">Brak uprawnień dla wybranego konta.</string>
     <string name="wrong_login_or_pass">Pola są puste lub cena jest równa zero.</string>
+
+    <string-array name="category_list">
+        <item>Inne</item>
+        <item>Perkusyjne</item>
+        <item>Dęte</item>
+        <item>Strunowe</item>
+    </string-array>
 </resources>

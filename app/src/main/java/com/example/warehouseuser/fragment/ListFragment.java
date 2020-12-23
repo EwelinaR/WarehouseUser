@@ -20,6 +20,7 @@ import com.example.warehouseuser.api.RestApi;
 import com.example.warehouseuser.data.Instrument;
 import com.example.warehouseuser.InstrumentAdapter;
 import com.example.warehouseuser.R;
+import com.example.warehouseuser.data.InstrumentWrapper;
 import com.example.warehouseuser.fragment.update.FragmentUpdateList;
 import com.example.warehouseuser.fragment.update.OnAuthenticationUpdate;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -27,6 +28,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListFragment extends Fragment implements FragmentUpdateList, OnAuthenticationUpdate {
 
@@ -57,7 +59,8 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
 
     private void getInstruments() {
         InternalStorage storage = new InternalStorage(activity);
-        List<Instrument> instruments = storage.readInstrumentsForDisplay();
+      //  storage.deleteData();
+        List<InstrumentWrapper> instruments = storage.readUpdatedInstruments();
         if (instruments == null) {
             api.getInstruments(this);
         } else {
@@ -67,7 +70,7 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
     }
 
     @Override
-    public void updateView(RequestResponseStatus status, List<Instrument> instruments) {
+    public void updateView(RequestResponseStatus status, List<InstrumentWrapper> instruments) {
         if (status == RequestResponseStatus.TIMEOUT) {
             Snackbar mySnackbar = Snackbar.make(activity.findViewById(R.id.list_view),
                     getString(R.string.connection_timeout), Snackbar.LENGTH_INDEFINITE);
@@ -84,8 +87,9 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
         displayInstruments(instruments);
     }
 
-    private void displayInstruments(List<Instrument> instruments) {
-        InstrumentAdapter adapter = new InstrumentAdapter(activity, instruments);
+    private void displayInstruments(List<InstrumentWrapper> instruments) {
+        InstrumentAdapter adapter = new InstrumentAdapter(activity,
+                instruments.stream().filter(i -> !i.isDeleted()).collect(Collectors.toList()));
         ListView listView = activity.findViewById(R.id.list_view);
         listView.setAdapter(adapter);
 
@@ -100,7 +104,7 @@ public class ListFragment extends Fragment implements FragmentUpdateList, OnAuth
         });
     }
 
-    private void saveInstruments(List<Instrument> instruments) {
+    private void saveInstruments(List<InstrumentWrapper> instruments) {
         InternalStorage storage = new InternalStorage(activity);
         try {
             storage.saveInstrumentsFromServer(instruments);
